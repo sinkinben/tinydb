@@ -2,6 +2,7 @@
 int main(int argc, char *argv[])
 {
     buffer_t *input_buffer = new_buffer_input();
+    table_t *table = new_table();
     while (true)
     {
         print_prompt();
@@ -24,12 +25,25 @@ int main(int argc, char *argv[])
         {
         case PREPARE_SUCCESS:
             break;
+        case PREPARE_SYNTAX_ERROR:
+            printf("Syntax error. Could not parse sql statement.\n");
+            continue;
         case PREPARE_UNRECOGNIZED_STATEMENT:
             printf("Unrecognized keyword at start of '%s'.\n", input_buffer->buffer);
             continue;
         }
 
-        execute_statement(&statement);
-        printf("Executed. \n");
+        switch (execute_statement(&statement, table))
+        {
+        case EXECUTE_SUCCESS:
+            printf("Executed. \n");
+            break;
+        case EXECUTE_TABLE_FULL:
+            printf("Exectue Error: Table full.\n");
+            break;
+        case EXECUTE_UNKNOWN_STATEMENT:
+            printf("Exectue Error: Unknown sql statement '%s' \n", input_buffer->buffer);
+            break;
+        }
     }
 }

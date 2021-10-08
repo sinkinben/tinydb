@@ -2,15 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include "table.h"
+#include "types.h"
+#include "statement.h"
 #ifndef DATA_STRUCTURE_H
 #define DATA_STRUCTURE_H
-
-typedef struct
-{
-    char *buffer;
-    size_t buffer_length;
-    ssize_t input_length;
-} buffer_t;
 
 buffer_t *new_buffer_input()
 {
@@ -46,18 +42,6 @@ void close_input_buffer(buffer_t *input)
     free(input);
 }
 
-typedef enum
-{
-    META_COMMAND_SUCCESS,
-    META_COMMAND_UNRECOGNIZED_COMMAND
-} meta_command_result_t;
-
-typedef enum
-{
-    PREPARE_SUCCESS,
-    PREPARE_UNRECOGNIZED_STATEMENT
-} prepare_result_t;
-
 // 执行 meta 命令: .exit, etc
 meta_command_result_t do_meta_command(buffer_t *input)
 {
@@ -71,23 +55,21 @@ meta_command_result_t do_meta_command(buffer_t *input)
     }
 }
 
-typedef enum
-{
-    STATEMENT_INSERT,
-    STATEMENT_SELECT
-} statement_type_t;
-
-typedef struct
-{
-    statement_type_t type;
-} statement_t;
-
 // 执行 insert, select 命令
 prepare_result_t prepare_statement(buffer_t *input, statement_t *statement)
 {
     if (strncmp(input->buffer, "insert", 6) == 0)
     {
         statement->type = STATEMENT_INSERT;
+        int args_assigned = sscanf(input->buffer,
+                                   "insert %u %s %s",
+                                   &(statement->row_to_insert.id),
+                                   (char *)&(statement->row_to_insert.username),
+                                   (char *)&(statement->row_to_insert.email));
+        if (args_assigned < 3)
+        {
+            return PREPARE_SYNTAX_ERROR;
+        }
         return PREPARE_SUCCESS;
     }
     if (strncmp(input->buffer, "select", 6) == 0)
@@ -98,19 +80,18 @@ prepare_result_t prepare_statement(buffer_t *input, statement_t *statement)
     return PREPARE_UNRECOGNIZED_STATEMENT;
 }
 
-void execute_statement(statement_t *statement)
+execute_result_t execute_statement(statement_t *statement, table_t *table)
 {
     switch (statement->type)
     {
     case STATEMENT_INSERT:
-        printf("insert action here. \n");
-        break;
+        return execute_insert(statement, table);
     case STATEMENT_SELECT:
-        printf("select action here. \n");
-        break;
+        return execute_select(statement, table);
     default:
         break;
     }
+    return EXECUTE_UNKNOWN_STATEMENT;
 }
 
 #endif
