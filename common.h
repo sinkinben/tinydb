@@ -43,10 +43,11 @@ void close_input_buffer(buffer_t *input)
 }
 
 // 执行 meta 命令: .exit, etc
-meta_command_result_t do_meta_command(buffer_t *input)
+meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
 {
     if (strcmp(input->buffer, ".exit") == 0)
     {
+        free_table(table);
         exit(EXIT_SUCCESS);
     }
     else

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
         if (input_buffer->buffer[0] == '.')
         {
-            switch (do_meta_command(input_buffer))
+            switch (do_meta_command(input_buffer, table))
             {
             case META_COMMAND_SUCCESS:
                 continue;
