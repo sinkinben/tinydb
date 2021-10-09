@@ -28,6 +28,9 @@ int main(int argc, char *argv[])
         case PREPARE_SYNTAX_ERROR:
             printf("Syntax error. Could not parse sql statement.\n");
             continue;
+        case PREPARE_STRING_TOO_LONG:
+            printf("String is too long.\n");
+            continue;
         case PREPARE_UNRECOGNIZED_STATEMENT:
             printf("Unrecognized keyword at start of '%s'.\n", input_buffer->buffer);
             continue;
@@ -36,7 +39,7 @@ int main(int argc, char *argv[])
         switch (execute_statement(&statement, table))
         {
         case EXECUTE_SUCCESS:
-            printf("Executed. \n");
+            printf("Executed.\n");
             break;
         case EXECUTE_TABLE_FULL:
             printf("Exectue Error: Table full.\n");

@@ -1,3 +1,6 @@
 .vscode
 *.out
 .o
+.bundle
+bin/
+test.c

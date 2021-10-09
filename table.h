@@ -10,8 +10,8 @@
 typedef struct
 {
     uint32_t id;
-    char username[COLUMN_USERNAME_SIZE];
-    char email[COLUMN_EMAIL_SIZE];
+    char username[COLUMN_USERNAME_SIZE + 1];
+    char email[COLUMN_EMAIL_SIZE + 1];
 } row_t;
 
 #define size_of_attribute(Struct, Attribute) sizeof(((Struct *)0)->Attribute)
@@ -67,7 +67,7 @@ void *get_row_slot(table_t *table, uint32_t row_num)
 
 void print_row(row_t *row)
 {
-    printf("(%d %s %s)\n", row->id, row->username, row->email);
+    printf("(%d, %s, %s)\n", row->id, row->username, row->email);
 }
 
 table_t *new_table()
