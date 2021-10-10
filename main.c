@@ -2,7 +2,13 @@
 int main(int argc, char *argv[])
 {
     buffer_t *input_buffer = new_buffer_input();
-    table_t *table = new_table();
+    if (argc < 2)
+    {
+        printf("Must supply a database filename.\n");
+        exit(EXIT_FAILURE);
+    }
+    char *filename = argv[1];
+    table_t *table = db_open(filename);
     while (true)
     {
         print_prompt();

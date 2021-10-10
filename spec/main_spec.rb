@@ -1,7 +1,10 @@
 describe 'database' do
+  before do
+    `rm mydb.db`
+  end
   def run_script(commands)
     raw_output = nil
-    IO.popen("./tinydb", "r+") do |pipe|
+    IO.popen("./tinydb mydb.db", "r+") do |pipe|
       commands.each do |command|
         pipe.puts command
       end
@@ -66,6 +69,27 @@ end
   expect(result).to match_array([
     "tinydb > String is too long.",
     "tinydb > Executed.",
+    "tinydb > ",
+  ])
+end
+
+
+  it 'keeps data after closing connection' do
+  result1 = run_script([
+    "insert 1 user1 person1@example.com",
+    ".exit",
+  ])
+  expect(result1).to match_array([
+    "tinydb > Executed.",
+    "tinydb > ",
+  ])
+  result2 = run_script([
+    "select",
+    ".exit",
+  ])
+  expect(result2).to match_array([
+    "tinydb > (1, user1, person1@example.com)",
+    "Executed.",
     "tinydb > ",
   ])
 end

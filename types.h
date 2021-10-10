@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #ifndef TYPES_H
 #define TYPES_H
 
@@ -29,6 +28,27 @@ typedef enum
     STATEMENT_SELECT
 } statement_type_t;
 
+// table 的一行·
+#define COLUMN_USERNAME_SIZE 32
+#define COLUMN_EMAIL_SIZE 255
+typedef struct
+{
+    uint32_t id;
+    char username[COLUMN_USERNAME_SIZE + 1];
+    char email[COLUMN_EMAIL_SIZE + 1];
+} row_t;
+
+#define size_of_attribute(Struct, Attribute) sizeof(((Struct *)0)->Attribute)
+const uint32_t ID_SIZE = size_of_attribute(row_t, id);
+const uint32_t USERNAME_SIZE = size_of_attribute(row_t, username);
+const uint32_t EMAIL_SIZE = size_of_attribute(row_t, email);
+const uint32_t ROW_SIZE = ID_SIZE + USERNAME_SIZE + EMAIL_SIZE;
+
+#define offset_of_attribute(Struct, Attribute) ((uint32_t)(&((Struct *)0)->Attribute))
+const uint32_t ID_OFFSET = offset_of_attribute(row_t, id);
+const uint32_t USERNAME_OFFSET = offset_of_attribute(row_t, username);
+const uint32_t EMAIL_OFFSET = offset_of_attribute(row_t, email);
+
 // insert, select 等命令的解析结果
 // 相当于一个简易的 sql-parser
 typedef struct
@@ -43,5 +63,27 @@ typedef enum
     EXECUTE_UNKNOWN_STATEMENT,
     EXECUTE_TABLE_FULL
 } execute_result_t;
+
+const uint32_t TABLE_MAX_PAGES = 100;
+
+const uint32_t PAGE_SIZE = 4096; // 4KB
+const uint32_t ROWS_PER_PAGE = PAGE_SIZE / ROW_SIZE;
+const uint32_t TABLE_MAX_ROWS = TABLE_MAX_PAGES * ROWS_PER_PAGE;
+
+typedef struct
+{
+    int file_descriptor;
+    uint32_t file_length;
+    void *pages[TABLE_MAX_PAGES];
+} pager_t;
+
+// 暂且不用 B+ 树, 使用数组的形式作为存储结构
+typedef struct
+{
+    uint32_t num_rows;
+    pager_t *pager;
+} table_t;
+
+
 
 #endif

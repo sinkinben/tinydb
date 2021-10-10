@@ -4,3 +4,5 @@
 .bundle
 bin/
 test.c
+tinydb
+mydb.db

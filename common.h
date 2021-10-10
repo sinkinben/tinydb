@@ -47,7 +47,7 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
 {
     if (strcmp(input->buffer, ".exit") == 0)
     {
-        free_table(table);
+        db_close(table);
         exit(EXIT_SUCCESS);
     }
     else
