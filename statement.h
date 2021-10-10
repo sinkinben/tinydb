@@ -10,19 +10,25 @@ execute_result_t execute_insert(statement_t *statement, table_t *table)
         return EXECUTE_TABLE_FULL;
     }
     row_t *row_to_insert = &(statement->row_to_insert);
-    serialize_row(row_to_insert, get_row_slot(table, table->num_rows));
+    cursor_t *cursor = table_end(table);
+    // serialize_row(row_to_insert, get_row_slot(table, table->num_rows));
+    serialize_row(row_to_insert, cursor_value(cursor));
     table->num_rows += 1;
+    free(cursor);
     return EXECUTE_SUCCESS;
 }
 
 execute_result_t execute_select(statement_t *statement, table_t *table)
 {
+    cursor_t *cursor = table_start(table);
     row_t row;
-    for (uint32_t i = 0; i < table->num_rows; i++)
+    while (!(cursor->end_of_table))
     {
-        deserialize_row(get_row_slot(table, i), &row);
+        deserialize_row(cursor_value(cursor), &row);
         print_row(&row);
+        cursor_advance(cursor);
     }
+    free(cursor);
     return EXECUTE_SUCCESS;
 }
 

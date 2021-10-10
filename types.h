@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <stdio.h>
 #ifndef TYPES_H
 #define TYPES_H
 
@@ -84,6 +86,11 @@ typedef struct
     pager_t *pager;
 } table_t;
 
-
+typedef struct
+{
+    table_t *table;
+    uint32_t row_num;
+    bool end_of_table; // this indicates a position one past the last element
+} cursor_t;
 
 #endif

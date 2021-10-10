@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "types.h"
 #include "pager.h"
+#include "cursor.h"
 #ifndef TABLE_H
 #define TABLE_H
 
@@ -21,17 +22,18 @@ void deserialize_row(void *source, row_t *dest)
     memcpy(&(dest->email), source + EMAIL_OFFSET, EMAIL_SIZE);
 }
 
+// get_row_slot no use any more
+// void *get_row_slot(table_t *table, uint32_t row_num)
+// {
+//     uint32_t page_num = row_num / ROWS_PER_PAGE;
+//     // pointer to the corresponding page of row
+//     void *page = get_page(table->pager, page_num);
+//     // offset in a page
+//     uint32_t row_offset = row_num % ROWS_PER_PAGE;
+//     uint32_t bytes_offset = row_offset * ROW_SIZE;
+//     return page + bytes_offset;
+// }
 
-void *get_row_slot(table_t *table, uint32_t row_num)
-{
-    uint32_t page_num = row_num / ROWS_PER_PAGE;
-    // pointer to the corresponding page of row
-    void *page = get_page(table->pager, page_num);
-    // offset in a page
-    uint32_t row_offset = row_num % ROWS_PER_PAGE;
-    uint32_t bytes_offset = row_offset * ROW_SIZE;
-    return page + bytes_offset;
-}
 
 void print_row(row_t *row)
 {
