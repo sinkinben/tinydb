@@ -1,10 +1,8 @@
 #include <stdint.h>
 #include "types.h"
+#include "declaration.h"
 #ifndef BTREE_H
 #define BTREE_H
-
-void serialize_row(row_t *source, void *dest);
-
 typedef enum
 {
     NODE_INTERNAL,
@@ -92,9 +90,63 @@ void leaf_node_insert(cursor_t *cursor, uint32_t key, row_t *value)
     serialize_row(value, leaf_node_value(node, cursor->cell_num));
 }
 
+/**
+ * leaf node 中, key 也是有序的, 因此此处使用二分查找
+ * Returns:
+ * - the position of the key
+ * - the position of another key that we’ll need to move if we want to insert the new key, or
+ * - the position after the last key in the node (the position one past the last key)
+ **/
+cursor_t *leaf_node_find(table_t *table, uint32_t page_num, uint32_t key)
+{
+    void *node = get_page(table->pager, page_num);
+    uint32_t num_cells = *leaf_node_num_cells(node);
+
+    cursor_t *cursor = (cursor_t *)malloc(sizeof(cursor_t));
+    cursor->table = table;
+    cursor->page_num = page_num;
+
+    // Binary Search: [l, r)
+    uint32_t l = 0, r = num_cells;
+    while (l != r)
+    {
+        uint32_t cell_num_index = l + ((r - l) >> 1);
+        uint32_t key_at_index = *leaf_node_key(node, cell_num_index);
+        if (key == key_at_index)
+        {
+            cursor->cell_num = cell_num_index;
+            return cursor;
+        }
+        else if (key < key_at_index)
+        {
+            r = cell_num_index;
+        }
+        else if (key > key_at_index)
+        {
+            l = cell_num_index + 1;
+        }
+    }
+    cursor->cell_num = l;
+    return cursor;
+}
+
+node_type_t get_node_type(void *node)
+{
+    uint8_t value = *(uint8_t *)(node + NODE_TYPE_OFFSET);
+    return (node_type_t)value;
+}
+
+void set_node_type(void *node, node_type_t node_type)
+{
+    uint8_t value = node_type;
+    uint8_t *pos = (uint8_t *)(node + NODE_TYPE_OFFSET);
+    *pos = value;
+}
+
 void init_leaf_node(void *node)
 {
     *leaf_node_num_cells(node) = 0;
+    set_node_type(node, NODE_LEAF);
 }
 
 #endif

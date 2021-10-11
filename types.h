@@ -62,6 +62,7 @@ typedef struct
 typedef enum
 {
     EXECUTE_SUCCESS,
+    EXECUTE_DUPLICATE_KEY,
     EXECUTE_UNKNOWN_STATEMENT,
     EXECUTE_TABLE_FULL
 } execute_result_t;

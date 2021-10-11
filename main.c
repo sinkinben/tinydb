@@ -47,11 +47,14 @@ int main(int argc, char *argv[])
         case EXECUTE_SUCCESS:
             printf("Executed.\n");
             break;
+        case EXECUTE_DUPLICATE_KEY:
+            printf("Execute Error: Duplicate key.\n");
+            break;
         case EXECUTE_TABLE_FULL:
-            printf("Exectue Error: Table full.\n");
+            printf("Execute Error: Table full.\n");
             break;
         case EXECUTE_UNKNOWN_STATEMENT:
-            printf("Exectue Error: Unknown sql statement '%s' \n", input_buffer->buffer);
+            printf("Execute Error: Unknown sql statement '%s' \n", input_buffer->buffer);
             break;
         }
     }

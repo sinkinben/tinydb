@@ -1,6 +1,7 @@
 describe 'database' do
   before do
     `rm mydb.db`
+    `make build`
   end
   def run_script(commands)
     raw_output = nil
@@ -37,7 +38,7 @@ describe 'database' do
   end
   script << ".exit"
   result = run_script(script)
-  expect(result[-2]).to eq('tinydb > Exectue Error: Table full.')
+  expect(result[-2]).to eq('tinydb > Execute Error: Table full.')
   end
 
   it 'allows inserting strings that are the maximum length' do
@@ -94,6 +95,27 @@ describe 'database' do
   ])
   end
 
+  it 'allows printing out the structure of a one-node btree' do
+    script = [3, 1, 2].map do |i|
+      "insert #{i} user#{i} person#{i}@example.com"
+    end
+    script << ".btree"
+    script << ".exit"
+    result = run_script(script)
+
+    expect(result).to match_array([
+      "tinydb > Executed.",
+      "tinydb > Executed.",
+      "tinydb > Executed.",
+      "tinydb > Tree:",
+      "leaf (size 3)",
+      "  - 0 : 1",
+      "  - 1 : 2",
+      "  - 2 : 3",
+      "tinydb > "
+    ])
+  end
+
   it 'prints constants' do
     script = [
       ".constants",
@@ -109,6 +131,22 @@ describe 'database' do
       "LEAF_NODE_CELL_SIZE: 297",
       "LEAF_NODE_SPACE_FOR_CELLS: 4086",
       "LEAF_NODE_MAX_CELLS: 13",
+      "tinydb > ",
+    ])
+  end
+  it 'prints an error message if there is a duplicate id' do
+    script = [
+      "insert 1 user1 person1@example.com",
+      "insert 1 user1 person1@example.com",
+      "select",
+      ".exit",
+    ]
+    result = run_script(script)
+    expect(result).to match_array([
+      "tinydb > Executed.",
+      "tinydb > Execute Error: Duplicate key.",
+      "tinydb > (1, user1, person1@example.com)",
+      "Executed.",
       "tinydb > ",
     ])
   end

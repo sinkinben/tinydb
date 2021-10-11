@@ -17,18 +17,17 @@ cursor_t *table_start(table_t *table)
     return cursor;
 }
 
-cursor_t *table_end(table_t *table)
-{
-    cursor_t *cursor = (cursor_t *)malloc(sizeof(cursor_t));
-    cursor->table = table;
-    cursor->page_num = table->root_page_num; // Why?
-
-    void *root_node = get_page(table->pager, table->root_page_num);
-    uint32_t num_cells = *leaf_node_num_cells(root_node);
-    cursor->cell_num = num_cells;
-    cursor->end_of_table = true;
-    return cursor;
-}
+// cursor_t *table_end(table_t *table)
+// {
+//     cursor_t *cursor = (cursor_t *)malloc(sizeof(cursor_t));
+//     cursor->table = table;
+//     cursor->page_num = table->root_page_num; // Why?
+//     void *root_node = get_page(table->pager, table->root_page_num);
+//     uint32_t num_cells = *leaf_node_num_cells(root_node);
+//     cursor->cell_num = num_cells;
+//     cursor->end_of_table = true;
+//     return cursor;
+// }
 
 // get row address of the argument cursor
 void *cursor_value(cursor_t *cursor)

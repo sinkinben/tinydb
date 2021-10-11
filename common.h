@@ -57,6 +57,12 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
         print_constants();
         return META_COMMAND_SUCCESS;
     }
+    else if (strcmp(input->buffer, ".btree") == 0)
+    {
+        printf("Tree:\n");
+        print_leaf_node(get_page(table->pager, 0));
+        return META_COMMAND_SUCCESS;
+    }
     else
     {
         return META_COMMAND_UNRECOGNIZED_COMMAND;
