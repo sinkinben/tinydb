@@ -25,6 +25,13 @@ pager_t *pager_open(const char *filename)
     pager_t *pager = (pager_t *)malloc(sizeof(pager_t));
     pager->file_descriptor = fd;
     pager->file_length = file_length;
+    pager->num_pages = file_length / PAGE_SIZE;
+
+    if (file_length % PAGE_SIZE != 0)
+    {
+        printf("Db file is not a whole number of pages. Corrupt file.\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (uint32_t i = 0; i < TABLE_MAX_PAGES; i++)
     {
@@ -47,10 +54,11 @@ void *get_page(pager_t *pager, uint32_t page_num)
         void *page = malloc(PAGE_SIZE);
         uint32_t num_pages = pager->file_length / PAGE_SIZE;
 
-        if (pager->file_length % PAGE_SIZE)
-        {
-            num_pages += 1;
-        }
+        // 引入 B tree 之后必然是整页读写的
+        // if (pager->file_length % PAGE_SIZE)
+        // {
+        //     num_pages += 1;
+        // }
 
         if (page_num <= num_pages)
         {
@@ -63,11 +71,18 @@ void *get_page(pager_t *pager, uint32_t page_num)
             }
         }
         pager->pages[page_num] = page;
+
+        // pager_open() 中 num_pages 初始化为 file_length / PAGE_SIZE
+        // 当插入数据时，需要新增 1 page 时执行
+        if (page_num >= pager->num_pages)
+        {
+            pager->num_pages = page_num + 1;
+        }
     }
     return pager->pages[page_num];
 }
 
-void pager_flush(pager_t *pager, uint32_t page_num, uint32_t size)
+void pager_flush(pager_t *pager, uint32_t page_num)
 {
     if (pager->pages[page_num] == NULL)
     {
@@ -82,7 +97,7 @@ void pager_flush(pager_t *pager, uint32_t page_num, uint32_t size)
         exit(EXIT_FAILURE);
     }
 
-    ssize_t bytes_written = write(pager->file_descriptor, pager->pages[page_num], size);
+    ssize_t bytes_written = write(pager->file_descriptor, pager->pages[page_num], PAGE_SIZE);
 
     if (bytes_written == -1)
     {

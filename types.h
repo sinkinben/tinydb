@@ -69,27 +69,29 @@ typedef enum
 const uint32_t TABLE_MAX_PAGES = 100;
 
 const uint32_t PAGE_SIZE = 4096; // 4KB
-const uint32_t ROWS_PER_PAGE = PAGE_SIZE / ROW_SIZE;
-const uint32_t TABLE_MAX_ROWS = TABLE_MAX_PAGES * ROWS_PER_PAGE;
+// const uint32_t ROWS_PER_PAGE = PAGE_SIZE / ROW_SIZE;
+// const uint32_t TABLE_MAX_ROWS = TABLE_MAX_PAGES * ROWS_PER_PAGE;
 
 typedef struct
 {
     int file_descriptor;
     uint32_t file_length;
-    void *pages[TABLE_MAX_PAGES];
+    uint32_t num_pages;
+    void *pages[TABLE_MAX_PAGES]; // 每个 pages[i] 映射到 disk 上的一个 page
 } pager_t;
 
 // 暂且不用 B+ 树, 使用数组的形式作为存储结构
 typedef struct
 {
-    uint32_t num_rows;
+    uint32_t root_page_num;
     pager_t *pager;
 } table_t;
 
 typedef struct
 {
     table_t *table;
-    uint32_t row_num;
+    uint32_t page_num; // cursor 当前指向哪一 page
+    uint32_t cell_num; // cursor 当前指向 page 中的哪一个 cell
     bool end_of_table; // this indicates a position one past the last element
 } cursor_t;
 

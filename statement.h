@@ -5,15 +5,14 @@
 
 execute_result_t execute_insert(statement_t *statement, table_t *table)
 {
-    if (table->num_rows >= TABLE_MAX_ROWS)
+    void *node = get_page(table->pager, table->root_page_num);
+    if ((*leaf_node_num_cells(node)) >= LEAF_NODE_MAX_CELLS)
     {
         return EXECUTE_TABLE_FULL;
     }
     row_t *row_to_insert = &(statement->row_to_insert);
     cursor_t *cursor = table_end(table);
-    // serialize_row(row_to_insert, get_row_slot(table, table->num_rows));
-    serialize_row(row_to_insert, cursor_value(cursor));
-    table->num_rows += 1;
+    leaf_node_insert(cursor, row_to_insert->id, row_to_insert);
     free(cursor);
     return EXECUTE_SUCCESS;
 }

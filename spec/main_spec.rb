@@ -38,7 +38,7 @@ describe 'database' do
   script << ".exit"
   result = run_script(script)
   expect(result[-2]).to eq('tinydb > Exectue Error: Table full.')
-end
+  end
 
   it 'allows inserting strings that are the maximum length' do
   long_username = "a"*32
@@ -55,7 +55,7 @@ end
     "Executed.",
     "tinydb > ",
   ])
-end
+  end
 
   it 'prints error message if strings are too long' do
   long_username = "a"*33
@@ -71,7 +71,7 @@ end
     "tinydb > Executed.",
     "tinydb > ",
   ])
-end
+  end
 
 
   it 'keeps data after closing connection' do
@@ -92,5 +92,24 @@ end
     "Executed.",
     "tinydb > ",
   ])
-end
+  end
+
+  it 'prints constants' do
+    script = [
+      ".constants",
+      ".exit",
+    ]
+    result = run_script(script)
+
+    expect(result).to match_array([
+      "tinydb > Constants:",
+      "ROW_SIZE: 293",
+      "COMMON_NODE_HEADER_SIZE: 6",
+      "LEAF_NODE_HEADER_SIZE: 10",
+      "LEAF_NODE_CELL_SIZE: 297",
+      "LEAF_NODE_SPACE_FOR_CELLS: 4086",
+      "LEAF_NODE_MAX_CELLS: 13",
+      "tinydb > ",
+    ])
+  end
 end

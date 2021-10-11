@@ -5,6 +5,7 @@
 #include "table.h"
 #include "types.h"
 #include "statement.h"
+#include "debug.h"
 #ifndef DATA_STRUCTURE_H
 #define DATA_STRUCTURE_H
 
@@ -49,6 +50,12 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
     {
         db_close(table);
         exit(EXIT_SUCCESS);
+    }
+    else if (strcmp(input->buffer, ".constants") == 0)
+    {
+        printf("Constants:\n");
+        print_constants();
+        return META_COMMAND_SUCCESS;
     }
     else
     {
