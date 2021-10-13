@@ -75,13 +75,13 @@ const uint32_t INTERNAL_NODE_HEADER_SIZE = COMMON_NODE_HEADER_SIZE + INTERNAL_NO
  * +----------------------+-------------------+------------------------+
  * | interval node layers | max leaf nodes    | size of all leaf nodes |
  * +----------------------+-------------------+------------------------+
- * |          0           | 511 ^ 0 = 0       | 4KB                    |
+ * |          0           | 511 ^ 0 = 1       | 4KB                    |
  * |          1           | 511 ^ 1 = 511     | 4KB * 511 < 2MB        |
  * |          2           | 511 ^ 2 = 261,121 | 2MB * 511 < 1GB        |
  * |          3           | 511 ^ 3           | 1GB * 511 < 512GB      |
  * +----------------------+-------------------+------------------------+
  * 
- * This is why B-Tree is a useful data structure for index?
+ * This is why B-Tree is a useful data structure for index.
  *   - given a key, we can find the corresponding leaf node in log(n) time
  *   - in each node(internal/leaf), we can do a binary search, which is also log(n) time
  *   - we can search through 500GB of data by loading 4 pages from disk
@@ -231,7 +231,8 @@ void leaf_node_split_and_insert(cursor_t *cursor, uint32_t key, row_t *value)
     /*
     - All existing keys plus new key should be divided
     - evenly between old (left) and new (right) nodes.
-    - cursor->cell_num is the returned value of function `leaf_node_find`
+    - cursor->cell_num is the returned value of function `leaf_node_find`,
+      which points to the index that new `key` should be inserted
     */
 
     // After insertion, new_node will be the right child, old_node will be the left child
@@ -273,8 +274,8 @@ void leaf_node_split_and_insert(cursor_t *cursor, uint32_t key, row_t *value)
     }
     else
     {
-        printf("Need to implement updating parent after spliting\n");
-        TODO(__FILE__, __LINE__);
+        printf("Need to implement updating parent after splitting\n");
+        // TODO(__FILE__, __LINE__);
         exit(EXIT_FAILURE);
     }
 }
@@ -295,6 +296,7 @@ void leaf_node_insert(cursor_t *cursor, uint32_t key, row_t *value)
         return;
     }
 
+    // simple insertion, which is similar to insert a new value into a sorted array
     if (cursor->cell_num < num_cells)
     {
         for (uint32_t i = num_cells; i > cursor->cell_num; i--)
@@ -345,6 +347,44 @@ cursor_t *leaf_node_find(table_t *table, uint32_t page_num, uint32_t key)
     }
     cursor->cell_num = l;
     return cursor;
+}
+
+cursor_t *internal_node_find(table_t *table, uint32_t page_num, uint32_t key)
+{
+    void *node = get_page(table->pager, page_num);
+    uint32_t num_keys = *internal_node_num_keys(node);
+
+    // binary search in internal node: [l, r)
+    // find the index `l` that the key should be insert at
+    uint32_t l = 0, r = num_keys;
+    while (l != r)
+    {
+        uint32_t m = l + ((r - l) >> 1);
+        uint32_t key_to_right = *internal_node_key(node, m);
+        if (key <= key_to_right)
+        {
+            r = m;
+        }
+        else
+        {
+            l = m + 1;
+        }
+    }
+
+    // now, we should insert `key` at child[l]
+    // since key < key[l] (the new `key` should be insert at index `l`)
+    uint32_t child_page_num = *internal_node_child(node, l);
+    void *child = get_page(table->pager, child_page_num);
+    switch (get_node_type(child))
+    {
+    case NODE_INTERNAL:
+        return internal_node_find(table, child_page_num, key);
+    case NODE_LEAF:
+        return leaf_node_find(table, child_page_num, key);
+    }
+    // should not be here
+    assert(0);
+    return NULL;
 }
 
 uint32_t *internal_node_num_keys(void *node)
