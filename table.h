@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "types.h"
 #include "pager.h"
-#include "cursor.h"
+// #include "cursor.h"
 #include "btree.h"
 #ifndef TABLE_H
 #define TABLE_H

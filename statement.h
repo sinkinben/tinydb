@@ -1,5 +1,5 @@
 #include "types.h"
-#include "table.h"
+#include "cursor.h"
 #ifndef STATEMENT_H
 #define STATEMENT_H
 

@@ -159,6 +159,7 @@ void create_new_root(table_t *table, uint32_t right_child_page_num)
       + let the old root become new root
     - Why do we let the new one become left child? This is a interesting question.
       + Consider we are spliting a leaf node (but not a root).
+      + Our `table_t` in memory, table->root_page_num should keep "=0".
     */
 
     // now `root` is actually old root
