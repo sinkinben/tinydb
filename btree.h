@@ -124,6 +124,7 @@ void set_node_type(void *node, node_type_t node_type)
 
 void init_leaf_node(void *node)
 {
+    memset(node, 0, PAGE_SIZE);
     *leaf_node_num_cells(node) = 0;
     set_node_type(node, NODE_LEAF);
     set_node_root(node, false);
@@ -131,6 +132,7 @@ void init_leaf_node(void *node)
 
 void init_internal_node(void *node)
 {
+    memset(node, 0, PAGE_SIZE);
     *internal_node_num_keys(node) = 0;
     set_node_type(node, NODE_INTERNAL);
     set_node_root(node, false);

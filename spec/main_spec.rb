@@ -162,8 +162,6 @@ describe 'database' do
     script << ".exit"
     result = run_script(script)
 
-
-
     expect(result[14...(result.length)]).to match_array([
       "tinydb > Tree:",
       "- internal (size 1)",
