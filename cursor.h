@@ -38,6 +38,7 @@ void *cursor_value(cursor_t *cursor)
 }
 
 // cursor++, points to next row of the table
+// This need to be fixed
 void cursor_advance(cursor_t *cursor)
 {
     uint32_t page_num = cursor->page_num;

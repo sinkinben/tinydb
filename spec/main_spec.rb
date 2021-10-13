@@ -32,14 +32,15 @@ describe 'database' do
     ])
   end
 
-  it 'prints error message when table is full' do
-    script = (1..1401).map do |i|
-      "insert #{i} user#{i} person#{i}@example.com"
-  end
-  script << ".exit"
-  result = run_script(script)
-  expect(result[-2]).to eq('tinydb > Execute Error: Table full.')
-  end
+  # When we implement btree as primary key index, the table can be full
+  # it 'prints error message when table is full' do
+  #   script = (1..1401).map do |i|
+  #     "insert #{i} user#{i} person#{i}@example.com"
+  # end
+  # script << ".exit"
+  # result = run_script(script)
+  # expect(result[-2]).to eq('tinydb > Execute Error: Table full.')
+  # end
 
   it 'allows inserting strings that are the maximum length' do
   long_username = "a"*32
@@ -108,10 +109,10 @@ describe 'database' do
       "tinydb > Executed.",
       "tinydb > Executed.",
       "tinydb > Tree:",
-      "leaf (size 3)",
-      "  - 0 : 1",
-      "  - 1 : 2",
-      "  - 2 : 3",
+      "- leaf (size 3)",
+      "  - 1",
+      "  - 2",
+      "  - 3",
       "tinydb > "
     ])
   end
@@ -134,6 +135,7 @@ describe 'database' do
       "tinydb > ",
     ])
   end
+
   it 'prints an error message if there is a duplicate id' do
     script = [
       "insert 1 user1 person1@example.com",
@@ -148,6 +150,41 @@ describe 'database' do
       "tinydb > (1, user1, person1@example.com)",
       "Executed.",
       "tinydb > ",
+    ])
+  end
+
+  it 'print out the structure of a 3-nodes btree' do
+    script = (1..14).map do |i|
+      "insert #{i} user#{i} person#{i}@example.com"
+    end
+    script << ".btree"
+    script << "insert 15 user15 person15@example.com"
+    script << ".exit"
+    result = run_script(script)
+
+
+
+    expect(result[14...(result.length)]).to match_array([
+      "tinydb > Tree:",
+      "- internal (size 1)",
+      "  - leaf (size 7)",
+      "    - 1",
+      "    - 2",
+      "    - 3",
+      "    - 4",
+      "    - 5",
+      "    - 6",
+      "    - 7",
+      "  - key 7",
+      "  - leaf (size 7)",
+      "    - 8",
+      "    - 9",
+      "    - 10",
+      "    - 11",
+      "    - 12",
+      "    - 13",
+      "    - 14",
+      "tinydb > Need to implement searching an internal node",
     ])
   end
 end

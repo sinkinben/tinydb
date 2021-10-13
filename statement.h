@@ -3,14 +3,18 @@
 #ifndef STATEMENT_H
 #define STATEMENT_H
 
+/**
+ * The parsing result of a SQL statement sentence is stored in statement_t
+ * SQL Statement Execute Function:
+ * - insert id username email
+ * - select
+ **/
+
 execute_result_t execute_insert(statement_t *statement, table_t *table)
 {
     void *node = get_page(table->pager, table->root_page_num);
     uint32_t num_cells = *leaf_node_num_cells(node);
-    if (num_cells >= LEAF_NODE_MAX_CELLS)
-    {
-        return EXECUTE_TABLE_FULL;
-    }
+
     row_t *row_to_insert = &(statement->row_to_insert);
     uint32_t key_to_insert = row_to_insert->id;
 

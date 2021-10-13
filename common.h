@@ -6,8 +6,8 @@
 #include "types.h"
 #include "statement.h"
 #include "debug.h"
-#ifndef DATA_STRUCTURE_H
-#define DATA_STRUCTURE_H
+#ifndef COMMON_H
+#define COMMON_H
 
 buffer_t *new_buffer_input()
 {
@@ -60,7 +60,7 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
     else if (strcmp(input->buffer, ".btree") == 0)
     {
         printf("Tree:\n");
-        print_leaf_node(get_page(table->pager, 0));
+        print_btree(table->pager, table->root_page_num, 0);
         return META_COMMAND_SUCCESS;
     }
     else
