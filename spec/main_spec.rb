@@ -47,7 +47,7 @@ describe 'database' do
   result = run_script(script)
   expect(result.last(2)).to match_array([
     "tinydb > Executed.",
-    "tinydb > Need to implement updating parent after splitting",
+    "tinydb > Need to implement splitting internal node",
   ])
   end
 
