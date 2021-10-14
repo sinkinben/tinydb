@@ -216,6 +216,18 @@ void *leaf_node_cell(void *node, uint32_t cell_num)
     return (node + LEAF_NODE_HEADER_SIZE + cell_num * LEAF_NODE_CELL_SIZE);
 }
 
+// Be careful: the arg `cell` is the pointer that points to a cell in leaf node
+// A cell contains (uint32_t key, row_t value)
+uint32_t *leaf_node_cell_key(void *cell)
+{
+    return (uint32_t *)(cell);
+}
+
+void *leaf_node_cell_value(void *cell)
+{
+    return cell + LEAF_NODE_KEY_SIZE;
+}
+
 uint32_t *leaf_node_key(void *node, uint32_t cell_num)
 {
     return (uint32_t *)leaf_node_cell(node, cell_num);
@@ -253,23 +265,25 @@ void leaf_node_split_and_insert(cursor_t *cursor, uint32_t key, row_t *value)
     {
         void *dest_node = cell_idx >= LEAF_NODE_LEFT_SPLIT_COUNT ? new_node : old_node;
         uint32_t index_within_node = cell_idx % LEAF_NODE_LEFT_SPLIT_COUNT;
-        void *dest_ptr = leaf_node_cell(dest_node, index_within_node);
+        void *dest_cell = leaf_node_cell(dest_node, index_within_node);
 
         // the operation below is similar to insert a new value into a sorted array
         // if `cell_idx` is the position we want to insert
         if (cell_idx == cursor->cell_num)
         {
-            serialize_row(value, dest_ptr);
+            // Remember that a cell contains (uint32_t key, row_t value)
+            serialize_row(value, leaf_node_cell_value(dest_cell));
+            *leaf_node_cell_key(dest_cell) = key;
         }
         // move: idx-1 => idx
         else if (cell_idx > cursor->cell_num)
         {
             assert(cell_idx >= 1);
-            memcpy(dest_ptr, leaf_node_cell(old_node, cell_idx - 1), LEAF_NODE_CELL_SIZE);
+            memcpy(dest_cell, leaf_node_cell(old_node, cell_idx - 1), LEAF_NODE_CELL_SIZE);
         }
         else /* if (cell_idx < cursor->cell_num) */
         {
-            memcpy(dest_ptr, leaf_node_cell(old_node, cell_idx), LEAF_NODE_CELL_SIZE);
+            memcpy(dest_cell, leaf_node_cell(old_node, cell_idx), LEAF_NODE_CELL_SIZE);
         }
     }
 

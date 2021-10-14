@@ -43,7 +43,16 @@ void cursor_advance(cursor_t *cursor)
     cursor->cell_num += 1;
     if (cursor->cell_num >= (*leaf_node_num_cells(node)))
     {
-        cursor->end_of_table = true;
+        uint32_t next_leaf = *leaf_node_next_leaf(node);
+        if (next_leaf != 0)
+        {
+            cursor->cell_num = 0;
+            cursor->page_num = next_leaf;
+        }
+        else
+        {
+            cursor->end_of_table = true;
+        }
     }
 }
 
