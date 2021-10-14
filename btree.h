@@ -36,7 +36,9 @@ const uint8_t COMMON_NODE_HEADER_SIZE = NODE_TYPE_SIZE + IS_ROOT_SIZE + PARENT_P
 // Leaf Node Header Layout
 const uint32_t LEAF_NODE_NUM_CELLS_SIZE = sizeof(uint32_t);
 const uint32_t LEAF_NODE_NUM_CELLS_OFFSET = COMMON_NODE_HEADER_SIZE;
-const uint32_t LEAF_NODE_HEADER_SIZE = COMMON_NODE_HEADER_SIZE + LEAF_NODE_NUM_CELLS_SIZE;
+const uint32_t LEAF_NODE_NEXT_LEAF_SIZE = sizeof(uint32_t);
+const uint32_t LEAF_NODE_NEXT_LEAF_OFFSET = LEAF_NODE_NUM_CELLS_OFFSET + LEAF_NODE_NUM_CELLS_SIZE;
+const uint32_t LEAF_NODE_HEADER_SIZE = COMMON_NODE_HEADER_SIZE + LEAF_NODE_NUM_CELLS_SIZE + LEAF_NODE_NEXT_LEAF_SIZE;
 
 // Leaf Node Body Layout
 const uint32_t LEAF_NODE_KEY_SIZE = sizeof(uint32_t);
@@ -92,6 +94,7 @@ const uint32_t INTERNAL_NODE_CELL_SIZE = INTERNAL_NODE_CHILD_SIZE + INTERNAL_NOD
 
 // 函数声明
 uint32_t *leaf_node_num_cells(void *);
+uint32_t *leaf_node_next_leaf(void *);
 uint32_t *internal_node_num_keys(void *);
 uint32_t *internal_node_child(void *, uint32_t);
 uint32_t get_node_max_key(void *);
@@ -126,6 +129,9 @@ void init_leaf_node(void *node)
 {
     memset(node, 0, PAGE_SIZE);
     *leaf_node_num_cells(node) = 0;
+    // page_num = 0 always root node
+    // of course, we can init `next_leaf` with -1
+    *leaf_node_next_leaf(node) = 0;
     set_node_type(node, NODE_LEAF);
     set_node_root(node, false);
 }
@@ -155,9 +161,9 @@ void create_new_root(table_t *table, uint32_t right_child_page_num)
     - The address of right child can be got by argument `right_child_page_num`.
     - The old root contains the data of left child after insertion, then we should:
       + create a new node, and copy data from old root
-      + let the new one become the left child after insertion
+      + let the new node become the left child after insertion
       + let the old root become new root
-    - Why do we let the new one become left child? This is a interesting question.
+    - Why do we let the new node become left child? This is a interesting question.
       + Consider we are spliting a leaf node (but not a root).
       + Our `table_t` in memory, table->root_page_num should keep "=0".
     */
@@ -198,6 +204,11 @@ void create_new_root(table_t *table, uint32_t right_child_page_num)
 uint32_t *leaf_node_num_cells(void *node)
 {
     return (uint32_t *)(node + LEAF_NODE_NUM_CELLS_OFFSET);
+}
+
+uint32_t *leaf_node_next_leaf(void *node)
+{
+    return (uint32_t *)(node + LEAF_NODE_NEXT_LEAF_OFFSET);
 }
 
 void *leaf_node_cell(void *node, uint32_t cell_num)
@@ -261,6 +272,12 @@ void leaf_node_split_and_insert(cursor_t *cursor, uint32_t key, row_t *value)
             memcpy(dest_ptr, leaf_node_cell(old_node, cell_idx), LEAF_NODE_CELL_SIZE);
         }
     }
+
+    // before splitting: old_node -> sibling
+    // after splitting: old_node -> new_node -> sibling
+    uint32_t sibling = *leaf_node_next_leaf(old_node);
+    *leaf_node_next_leaf(old_node) = new_page_num;
+    *leaf_node_next_leaf(new_node) = sibling;
 
     // update cell_nums both in left child and right child
     *(leaf_node_num_cells(old_node)) = LEAF_NODE_LEFT_SPLIT_COUNT;
