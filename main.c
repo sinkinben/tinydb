@@ -38,6 +38,9 @@ int main(int argc, char *argv[])
         case PARSE_STRING_TOO_LONG:
             printf("String is too long.\n");
             continue;
+        case PARSE_UNIMPLEMENTED:
+            printf("SQL statement '%s' is not implemented.\n", strtok(input_buffer->buffer, " "));
+            continue;
         case PARSE_UNRECOGNIZED_STATEMENT:
             printf("Unrecognized keyword at start of '%s'.\n", input_buffer->buffer);
             continue;

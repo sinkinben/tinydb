@@ -42,6 +42,27 @@ parse_result_t parse_select(buffer_t *input, statement_t *statement)
     return PARSE_SUCCESS;
 }
 
+parse_result_t parse_update(buffer_t *input, statement_t *statement)
+{
+    return PARSE_UNIMPLEMENTED;
+}
+
+parse_result_t parse_delete(buffer_t *input, statement_t *statement)
+{
+    return PARSE_UNIMPLEMENTED;
+}
+
+parse_result_t parse_commit(buffer_t *input, statement_t *statement)
+{
+    return PARSE_UNIMPLEMENTED;
+}
+
+parse_result_t parse_rollback(buffer_t *input, statement_t *statement)
+{
+    return PARSE_UNIMPLEMENTED;
+}
+
+
 // 执行 insert, select 命令
 parse_result_t parse_statement(buffer_t *input, statement_t *statement)
 {
@@ -52,6 +73,22 @@ parse_result_t parse_statement(buffer_t *input, statement_t *statement)
     if (strncmp(input->buffer, "select", 6) == 0)
     {
         return parse_select(input, statement);
+    }
+    if (strncmp(input->buffer, "update", 6) == 0)
+    {
+        return parse_update(input, statement);
+    }
+    if (strncmp(input->buffer, "delete", 6) == 0)
+    {
+        return parse_delete(input, statement);
+    }
+    if (strncmp(input->buffer, "commit", 6) == 0)
+    {
+        return parse_commit(input, statement);
+    }
+    if (strncmp(input->buffer, "rollback", 8) == 0)
+    {
+        return parse_rollback(input, statement);
     }
     return PARSE_UNRECOGNIZED_STATEMENT;
 }
