@@ -79,6 +79,8 @@ execute_result_t execute_statement(statement_t *statement, table_t *table)
         return execute_insert(statement, table);
     case STATEMENT_SELECT:
         return execute_select(statement, table);
+    case STATEMENT_UPDATE:
+        return execute_update(statement, table);
     default:
         break;
     }

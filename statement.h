@@ -49,4 +49,13 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
     return EXECUTE_SUCCESS;
 }
 
+execute_result_t execute_update(statement_t *statement, table_t *table)
+{
+    uint32_t key_to_update = statement->row_to_insert.id;
+    cursor_t *cursor = table_find(table, key_to_update);
+    void *row = cursor_value(cursor);
+    serialize_row(&(statement->row_to_insert), row);
+    return EXECUTE_SUCCESS;
+}
+
 #endif

@@ -28,7 +28,8 @@ typedef enum
 typedef enum
 {
     STATEMENT_INSERT,
-    STATEMENT_SELECT
+    STATEMENT_SELECT,
+    STATEMENT_UPDATE
 } statement_type_t;
 
 // table 的一行·
