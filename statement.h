@@ -4,7 +4,8 @@
 #define STATEMENT_H
 
 /**
- * The parsing result of a SQL statement sentence is stored in statement_t
+ * The parsing result of a SQL statement sentence is stored in statement_t.
+ * These `execute_xxx` functions are equal to the "Vitrual Machine" in sqlite.
  * SQL Statement Execute Function:
  * - insert id username email
  * - select

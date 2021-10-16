@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sqlparser.h"
 int main(int argc, char *argv[])
 {
     buffer_t *input_buffer = new_buffer_input();
@@ -27,17 +28,17 @@ int main(int argc, char *argv[])
         }
 
         statement_t statement;
-        switch (prepare_statement(input_buffer, &statement))
+        switch (parse_statement(input_buffer, &statement))
         {
-        case PREPARE_SUCCESS:
+        case PARSE_SUCCESS:
             break;
-        case PREPARE_SYNTAX_ERROR:
+        case PARSE_SYNTAX_ERROR:
             printf("Syntax error. Could not parse sql statement.\n");
             continue;
-        case PREPARE_STRING_TOO_LONG:
+        case PARSE_STRING_TOO_LONG:
             printf("String is too long.\n");
             continue;
-        case PREPARE_UNRECOGNIZED_STATEMENT:
+        case PARSE_UNRECOGNIZED_STATEMENT:
             printf("Unrecognized keyword at start of '%s'.\n", input_buffer->buffer);
             continue;
         }

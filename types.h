@@ -18,11 +18,11 @@ typedef enum
 
 typedef enum
 {
-    PREPARE_SUCCESS,
-    PREPARE_SYNTAX_ERROR,
-    PREPARE_STRING_TOO_LONG,
-    PREPARE_UNRECOGNIZED_STATEMENT
-} prepare_result_t;
+    PARSE_SUCCESS,
+    PARSE_SYNTAX_ERROR,
+    PARSE_STRING_TOO_LONG,
+    PARSE_UNRECOGNIZED_STATEMENT
+} parse_result_t;
 
 typedef enum
 {

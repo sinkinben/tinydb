@@ -43,7 +43,7 @@ void close_input_buffer(buffer_t *input)
     free(input);
 }
 
-// 执行 meta 命令: .exit, etc
+// 执行 meta 命令: .exit, .constants, .btree
 meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
 {
     if (strcmp(input->buffer, ".exit") == 0)
@@ -69,47 +69,8 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
     }
 }
 
-prepare_result_t prepare_insert(buffer_t *input, statement_t *statement)
-{
-    statement->type = STATEMENT_INSERT;
 
-    char *keyword = strtok(input->buffer, " ");
-    char *id_str = strtok(NULL, " ");
-    char *username = strtok(NULL, " ");
-    char *email = strtok(NULL, " ");
-
-    if (id_str == NULL || username == NULL || email == NULL)
-    {
-        return PREPARE_SYNTAX_ERROR;
-    }
-
-    int id = atoi(id_str);
-    if (strlen(username) > COLUMN_USERNAME_SIZE || strlen(email) > COLUMN_EMAIL_SIZE)
-    {
-        return PREPARE_STRING_TOO_LONG;
-    }
-
-    statement->row_to_insert.id = id;
-    strcpy(statement->row_to_insert.username, username);
-    strcpy(statement->row_to_insert.email, email);
-    return PREPARE_SUCCESS;
-}
-
-// 执行 insert, select 命令
-prepare_result_t prepare_statement(buffer_t *input, statement_t *statement)
-{
-    if (strncmp(input->buffer, "insert", 6) == 0)
-    {
-        return prepare_insert(input, statement);
-    }
-    if (strncmp(input->buffer, "select", 6) == 0)
-    {
-        statement->type = STATEMENT_SELECT;
-        return PREPARE_SUCCESS;
-    }
-    return PREPARE_UNRECOGNIZED_STATEMENT;
-}
-
+// 真正调用底层 API 执行 SQL, 相当于 sqlite 的 Core
 execute_result_t execute_statement(statement_t *statement, table_t *table)
 {
     switch (statement->type)

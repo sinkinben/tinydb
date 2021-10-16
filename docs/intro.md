@@ -50,7 +50,7 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
   - 先支持 `insert, select` 2 种 Statement，不支持 `where, group by` 等关键字。
   - `insert` 语句格式为: `insert [id] [username] [email]`  。
   - `select` 语句格式为: `select` ，默认输出 `table` 的所有数据。
-  - 2 种 SQL Statement 分别通过 `prepare_insert, prepare_select` 来进行 parsing (其实这就是手工的 SQL Compiler 😅) 。
+  - 2 种 SQL Statement 分别通过 `parse_insert, parse_select` 来进行 parsing (其实这就是手工的 SQL Compiler 😅) 。
 - P3 - 实现 `insert, select` 的功能
   - `table` 仅仅在内存当中，不支持持久化 (Persistence) 。
   - `table` 的每一行都是连续存放的，即通过数组的方式存储 `table` 数据。
@@ -88,3 +88,11 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 - Pager: map memory data to disk
 - The conception of Cursor
 
+
+
+**TODO**
+
+- 支持 `commit` ：把内存中修改过的内容持久化到磁盘（目前是 `.exit` 的时候全量覆盖写入）
+- 支持 `delete` ：删除某个 `key` .
+- 支持 `rollback`
+- 支持 `update`
