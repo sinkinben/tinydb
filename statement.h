@@ -6,9 +6,10 @@
 /**
  * The parsing result of a SQL statement sentence is stored in statement_t.
  * These `execute_xxx` functions are equal to the "Vitrual Machine" in sqlite.
- * SQL Statement Execute Function:
+ * SQL Statement:
  * - insert id username email
  * - select
+ * - update id username email
  **/
 
 execute_result_t execute_insert(statement_t *statement, table_t *table)
@@ -26,6 +27,7 @@ execute_result_t execute_insert(statement_t *statement, table_t *table)
         // printf("[execute insert] key_at_index = %d\n", key_at_index);
         if (key_at_index == key_to_insert)
         {
+            free(cursor);
             return EXECUTE_DUPLICATE_KEY;
         }
     }
@@ -54,7 +56,15 @@ execute_result_t execute_update(statement_t *statement, table_t *table)
     uint32_t key_to_update = statement->row_to_insert.id;
     cursor_t *cursor = table_find(table, key_to_update);
     void *row = cursor_value(cursor);
+    row_t temp;
+    deserialize_row(row, &temp);
+    if (temp.id != statement->row_to_insert.id)
+    {
+        free(cursor);
+        return EXECUTE_NO_SUCH_KEY;
+    }
     serialize_row(&(statement->row_to_insert), row);
+    free(cursor);
     return EXECUTE_SUCCESS;
 }
 

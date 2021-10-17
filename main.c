@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
     }
     char *filename = argv[1];
     table_t *table = db_open(filename);
+    // print_help();
     while (true)
     {
         print_prompt();
@@ -53,6 +54,9 @@ int main(int argc, char *argv[])
             break;
         case EXECUTE_DUPLICATE_KEY:
             printf("Execute Error: Duplicate key.\n");
+            break;
+        case EXECUTE_NO_SUCH_KEY:
+            printf("Execute Error: No such key %d\n", statement.row_to_insert.id);
             break;
         case EXECUTE_TABLE_FULL:
             printf("Execute Error: Table full.\n");
