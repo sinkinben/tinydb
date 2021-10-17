@@ -92,7 +92,8 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 
 **TODO**
 
-- 支持 `commit` ：把内存中修改过的内容持久化到磁盘（目前是 `.exit` 的时候全量覆盖写入）
+- 实现 Linux Kernel 的侵入式容器（实现一个链表）。
+  - 基于这个链表，实现一个操作 log 链表，然后支持 commit/rollback 等操作。
+- 支持 `commit` ：把内存中修改过的内容持久化到磁盘（目前是 `.exit` 的时候覆盖写入）
 - 支持 `delete` ：删除某个 `key` .
 - 支持 `rollback`
-- 支持 `update`
