@@ -5,10 +5,11 @@
  * 2. 工程上并不是一个好的设计, tinydb 为了方便, 把所有的函数实现都写在了 header file
  **/
 void serialize_row(row_t *source, void *dest);
+void *cursor_value(cursor_t *cursor);
 
-void TODO(const char *filename, int line_num)
-{
-    printf("TODO at %s: %d\n", filename, line_num);
-    assert(0);
-}
+#define TODO(filename, line_num) do {                   \
+    printf("TODO at %s: %d\n", filename, line_num); \
+    assert(0);                                      \
+} while(0)
+
 #endif

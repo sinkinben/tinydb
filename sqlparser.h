@@ -54,7 +54,15 @@ parse_result_t parse_update(buffer_t *input, statement_t *statement)
 
 parse_result_t parse_delete(buffer_t *input, statement_t *statement)
 {
-    return PARSE_UNIMPLEMENTED;
+    statement->type = STATEMENT_DELETE;
+    char *keyword = strtok(input->buffer, " ");
+    char *id_str = strtok(NULL, " ");
+    if (keyword == NULL || id_str == NULL)
+    {
+        return PARSE_SYNTAX_ERROR;
+    }
+    statement->row_to_insert.id = atoi(id_str);
+    return PARSE_SUCCESS;
 }
 
 parse_result_t parse_commit(buffer_t *input, statement_t *statement)

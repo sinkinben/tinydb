@@ -54,18 +54,30 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
 execute_result_t execute_update(statement_t *statement, table_t *table)
 {
     uint32_t key_to_update = statement->row_to_insert.id;
-    cursor_t *cursor = table_find(table, key_to_update);
-    void *row = cursor_value(cursor);
-    row_t temp;
-    deserialize_row(row, &temp);
-    if (temp.id != statement->row_to_insert.id)
+    cursor_t *cursor = table_exists(table, key_to_update);
+    if (cursor != NULL)
     {
+        void *row = cursor_value(cursor);
+        serialize_row(&(statement->row_to_insert), row);
         free(cursor);
-        return EXECUTE_NO_SUCH_KEY;
+        return EXECUTE_SUCCESS;
     }
-    serialize_row(&(statement->row_to_insert), row);
-    free(cursor);
-    return EXECUTE_SUCCESS;
+    return EXECUTE_NO_SUCH_KEY;
+}
+
+execute_result_t execute_delete(statement_t *statement, table_t *table)
+{
+    uint32_t key_to_delete = statement->row_to_insert.id;
+    cursor_t *cursor = table_exists(table, key_to_delete);
+    if (cursor != NULL)
+    {
+        // printf("[execute_delete] page num: %u\n", cursor->page_num);
+        // printf("[execute_delete] cell num: %u\n", cursor->cell_num);
+        leaf_node_fake_delete(cursor, key_to_delete);
+        free(cursor);
+        return EXECUTE_SUCCESS;
+    }
+    return EXECUTE_NO_SUCH_KEY;
 }
 
 #endif

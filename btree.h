@@ -409,6 +409,33 @@ cursor_t *leaf_node_find(table_t *table, uint32_t page_num, uint32_t key)
 }
 
 /**
+ * Fake deletion of B+Tree
+ * Suppose there are `num_cell = 4` cells in `node` (which are [2,5,6,7]), and `key = 2`.
+ * We simply delete the `key` like deletion in a sorted array (move data forward).
+ * 
+ * After deleting `key = 2`, num_cells = 3 (which are [5,6,7]), and
+ * we DO NOT adjust the parent of `node`, and the structure of our B+Tree.
+ * 
+ * Thus, we call it "fake_delete", since even if the row(cell) is deleted, 
+ * it still occupy disk space.
+ **/
+void leaf_node_fake_delete(cursor_t *cursor, uint32_t key_to_delete)
+{
+    uint32_t cell_num = cursor->cell_num;
+    void *node = get_page(cursor->table->pager, cursor->page_num);
+
+    uint32_t num_cells = *leaf_node_num_cells(node);
+
+    assert(cell_num < num_cells && *leaf_node_key(node, cell_num) == key_to_delete);
+
+    for (uint32_t i = cell_num; i + 1 < num_cells; i++)
+    {
+        memcpy(leaf_node_cell(node, i), leaf_node_cell(node, i + 1), LEAF_NODE_CELL_SIZE);
+    }
+    *leaf_node_num_cells(node) = num_cells - 1;
+}
+
+/**
  * Return the index of child which should contain/insert the given key
  * Binary search the cells[0,...,n-1] array
  * For example:

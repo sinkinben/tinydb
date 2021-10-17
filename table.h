@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "types.h"
 #include "pager.h"
-// #include "cursor.h"
 #include "btree.h"
 #ifndef TABLE_H
 #define TABLE_H
@@ -116,6 +115,43 @@ cursor_t *table_find(table_t *table, uint32_t key)
         // exit(EXIT_FAILURE);
         return internal_node_find(table, root_page_num, key);
     }
+}
+
+/**
+ * Check whether the key exists in the table,
+ * If not, return NULL. Otherwise, return cursor that points to the row in table
+ * Consider if `key_to_find` > max_key in leaf node:
+ *   - each cell is (uint32_t key, row_t value), total 294 bytes
+ *   - in leaf node(page), we have `n = num_cells` cells (index from 0, ..., n-1)
+ *   - in such case, cursor->cell_num will >= num_cells
+ **/
+cursor_t *table_exists(table_t *table, uint32_t key_to_find)
+{
+    cursor_t *cursor = table_find(table, key_to_find);
+    void *node = get_page(cursor->table->pager, cursor->page_num);
+    // printf("[table exists] key = %d\n", key_to_find);
+    // printf("[table exists] page = %d\n", cursor->page_num);
+    // printf("[table exists] cell = %d\n", cursor->cell_num);
+    // printf("[table exists] num_cells = %d\n", *leaf_node_num_cells(node));
+    
+    // In this case, the row address `row = cursor_value(cursor)` is invalid, 
+    // we should not access memory
+    // even if we fill zeros when initialize the leaf node
+    if (cursor->cell_num >= *leaf_node_num_cells(node))
+    {
+        free(cursor);
+        return NULL;
+    }
+
+    void *row = cursor_value(cursor);
+    row_t temp;
+    deserialize_row(row, &temp);
+    if (temp.id != key_to_find)
+    {
+        free(cursor);
+        cursor = NULL;
+    }
+    return cursor;
 }
 
 #endif

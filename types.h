@@ -29,7 +29,10 @@ typedef enum
 {
     STATEMENT_INSERT,
     STATEMENT_SELECT,
-    STATEMENT_UPDATE
+    STATEMENT_UPDATE,
+    STATEMENT_DELETE,
+    STATEMENT_COMMIT,
+    STATEMENT_ROLLBACK
 } statement_type_t;
 
 // table 的一行·
