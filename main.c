@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         case PARSE_SUCCESS:
             break;
         case PARSE_SYNTAX_ERROR:
-            printf("Syntax error. Could not parse sql statement.\n");
+            printf("Syntax error. Could not parse '%s' sql statement.\n", input_buffer->buffer);
             continue;
         case PARSE_STRING_TOO_LONG:
             printf("String is too long.\n");

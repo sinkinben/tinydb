@@ -18,7 +18,7 @@ parse_result_t parse_row_fields(buffer_t *input, statement_t *statement)
     char *id_str = strtok(NULL, " ");
     char *username = strtok(NULL, " ");
     char *email = strtok(NULL, " ");
-    if (id_str == NULL || username == NULL || email == NULL)
+    if (id_str == NULL || username == NULL || email == NULL || strtok(NULL, " ") != NULL)
     {
         return PARSE_SYNTAX_ERROR;
     }
@@ -57,7 +57,7 @@ parse_result_t parse_delete(buffer_t *input, statement_t *statement)
     statement->type = STATEMENT_DELETE;
     char *keyword = strtok(input->buffer, " ");
     char *id_str = strtok(NULL, " ");
-    if (keyword == NULL || id_str == NULL)
+    if (keyword == NULL || id_str == NULL || strtok(NULL, " ") != NULL)
     {
         return PARSE_SYNTAX_ERROR;
     }
