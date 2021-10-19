@@ -29,6 +29,7 @@ void print_help()
     printf("1) select (only one `select` keyword :-), and it will print all rows on table)\n");
     printf("2) insert [id:int] [name:str] [email:str]\n");
     printf("3) update [id:int] [name:str] [email:str]\n");
+    printf("4) delete [id:int]\n");
 }
 
 void print_prompt()
