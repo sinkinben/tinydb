@@ -48,8 +48,8 @@ const uint32_t LEAF_NODE_VALUE_OFFSET = LEAF_NODE_KEY_OFFSET + LEAF_NODE_KEY_SIZ
 const uint32_t LEAF_NODE_CELL_SIZE = LEAF_NODE_KEY_SIZE + LEAF_NODE_VALUE_SIZE;
 const uint32_t LEAF_NODE_SPACE_FOR_CELLS = PAGE_SIZE - LEAF_NODE_HEADER_SIZE;
 // we can set it with 3 for debugging
-const uint32_t LEAF_NODE_MAX_CELLS = LEAF_NODE_SPACE_FOR_CELLS / LEAF_NODE_CELL_SIZE;
-// const uint32_t LEAF_NODE_MAX_CELLS = 2;
+// const uint32_t LEAF_NODE_MAX_CELLS = LEAF_NODE_SPACE_FOR_CELLS / LEAF_NODE_CELL_SIZE;
+const uint32_t LEAF_NODE_MAX_CELLS = 3;
 
 // leaf node 已有 n = LEAF_NODE_MAX_CELLS  个 key
 // 插入新 key 值时, 需要分裂
@@ -553,16 +553,24 @@ uint32_t get_node_max_key(void *node)
 void update_internal_node_key(void *node, uint32_t old_key, uint32_t new_key)
 {
     uint32_t old_child_index = internal_node_find_cell(node, old_key);
-    *internal_node_key(node, old_child_index) = new_key;
+    uint32_t num_keys = *(internal_node_num_keys(node));
+    if (old_child_index < num_keys)
+    {
+        *internal_node_key(node, old_child_index) = new_key;
+    }
+    else
+    {
+        printf("[update_internal_node_key] should not update, but add to tail\n");
+    }
 
     // debugging
-    // printf("old_key = %d, new_key = %d, index = %d\n", old_key, new_key, old_child_index);
-    // printf("[update internal node key] ");
-    // for (uint32_t i = 0; i < *(internal_node_num_keys(node)); i++)
-    // {
-    //     printf("%d, ", *internal_node_key(node, i));
-    // }
-    // printf("\n");
+    printf("[update_internal_node_key] old_key = %d, new_key = %d, index = %d\n", old_key, new_key, old_child_index);
+    printf("[update internal node key] ");
+    for (uint32_t i = 0; i < num_keys; i++)
+    {
+        printf("%d, ", *internal_node_key(node, i));
+    }
+    printf("\n");
 }
 
 // Add a new child/key pair to parent that corresponds to child
@@ -574,12 +582,15 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     uint32_t child_max_key = get_node_max_key(child);
 
     // the `child_max_key` should be inserted at `index` within parent node
+    // `index` maybe equal to `old_num_keys`,
+    // since the new `child_max_key` should be insert to the rightmost position
     uint32_t index = internal_node_find_cell(parent, child_max_key);
 
     uint32_t old_num_keys = *internal_node_num_keys(parent);
-    *internal_node_num_keys(parent) = old_num_keys + 1;
+    
 
-    // printf("[internal node insert] child_max_key = %d, index = %d\n", child_max_key, index);
+    printf("[internal node insert] old_num_keys = %d, new_child_max_key = %d, index = %d\n",
+           old_num_keys, child_max_key, index);
 
     // if the parent need to be splitted
     if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
@@ -587,13 +598,12 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
         printf("Need to implement splitting internal node\n");
         exit(EXIT_FAILURE);
     }
+    *internal_node_num_keys(parent) = old_num_keys + 1;
+    uint32_t original_right_child_page_num = *internal_node_right_child(parent);
+    void *original_right_child = get_page(table->pager, original_right_child_page_num);
 
-    uint32_t right_child_page_num = *internal_node_right_child(parent);
-    void *right_child = get_page(table->pager, right_child_page_num);
-
-    // printf("[internal node insert] right_child_max_key = %d\n", get_node_max_key(right_child));
-
-    if (child_max_key > get_node_max_key(right_child))
+    // if (child_max_key > get_node_max_key(right_child))
+    if (index >= old_num_keys)
     {
         /** 
          * if the `child` will become the rightmost one of parent
@@ -601,14 +611,14 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
          **/
 
         // original rightmost become the last common child
-        *internal_node_child(parent, old_num_keys) = right_child_page_num;
+        *internal_node_child(parent, old_num_keys) = original_right_child_page_num;
         // update last common child's key
-        *internal_node_key(parent, old_num_keys) = get_node_max_key(right_child);
+        *internal_node_key(parent, old_num_keys) = get_node_max_key(original_right_child);
         // the `child` becomes the rightmost one
         *internal_node_right_child(parent) = child_page_num;
 
         // debugging: remind me if this case happens
-        // printf("here\n");
+        printf("[internal node insert] here\n");
     }
     else
     {
@@ -623,5 +633,7 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
         *internal_node_child(parent, index) = child_page_num;
     }
 }
+
+
 
 #endif
