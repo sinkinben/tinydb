@@ -349,7 +349,7 @@ void leaf_node_insert(cursor_t *cursor, uint32_t key, row_t *value)
     if (num_cells >= LEAF_NODE_MAX_CELLS)
     {
         // current node(page) is full
-        printf("Need to implement splitting a leaf node.\n");
+        // printf("Need to implement splitting a leaf node.\n");
         // exit(EXIT_FAILURE);
         leaf_node_split_and_insert(cursor, key, value);
         return;
@@ -557,13 +557,13 @@ void update_internal_node_key(void *node, uint32_t old_key, uint32_t new_key)
     *internal_node_key(node, old_child_index) = new_key;
 
     // debugging
-    printf("[update_internal_node_key] old_key = %d, new_key = %d, index = %d\n", old_key, new_key, old_child_index);
-    printf("[update internal node key] ");
-    for (uint32_t i = 0; i <= num_keys; i++)
-    {
-        printf("%d, ", *internal_node_key(node, i));
-    }
-    printf("\n");
+    // printf("[update_internal_node_key] old_key = %d, new_key = %d, index = %d\n", old_key, new_key, old_child_index);
+    // printf("[update internal node key] ");
+    // for (uint32_t i = 0; i <= num_keys; i++)
+    // {
+    //     printf("%d, ", *internal_node_key(node, i));
+    // }
+    // printf("\n");
 }
 
 // Add a new child/key pair to parent that corresponds to child
@@ -582,8 +582,8 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
 
     uint32_t old_num_keys = *internal_node_num_keys(parent);
 
-    printf("[internal node insert] old_num_keys = %d, new_child_max_key = %d, index = %d\n",
-           old_num_keys, child_max_key, index);
+    // printf("[internal node insert] old_num_keys = %d, new_child_max_key = %d, index = %d\n",
+    //        old_num_keys, child_max_key, index);
 
     // if the parent need to be splitted
     // if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
@@ -613,7 +613,7 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
         *internal_node_right_child(parent) = child_page_num;
 
         // debugging: remind me if this case happens
-        printf("[internal node insert] here\n");
+        // printf("[internal node insert] new key become rightmost\n");
     }
     else
     {
@@ -632,11 +632,12 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     //   - we have inserted the new_key(new_child) into internal node
     //   - but if old_nums_key == INTERNAL_NODE_MAX_CELLS
     //   - we need to split the internal node into two internal nodes
-    print_btree(table->pager, table->root_page_num, 0);
+    
+    // print_btree(table->pager, table->root_page_num, 0);
 
     if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
     {
-        printf("Need to implement splitting internal node\n");
+        // printf("Need to implement splitting internal node\n");
         internal_node_split(table, parent_page_num);
         // print_btree(table->pager, table->root_page_num, 0);
     }
@@ -734,15 +735,14 @@ void internal_node_split(table_t *table, uint32_t old_page_num)
 
     if (is_root_node(old_node))
     {
-        printf("[internal_node_split] create new root\n");
+        // printf("[internal_node_split] create new root\n");
         void *new_left_child = internal_create_new_root(table, new_node_page_num);
         *internal_node_right_child(new_left_child) = *internal_node_child(new_left_child, left_side_num_keys - 1);
         *internal_node_num_keys(new_left_child) -= 1;
     }
     else
     {
-        printf("[internal_node_split] else case: parent_page_num = %d\n",
-               parent_page_num);
+        // printf("[internal_node_split] else case: parent_page_num = %d\n", parent_page_num);
         internal_node_insert(table, parent_page_num, new_node_page_num);
         *internal_node_right_child(old_node) = *internal_node_child(old_node, left_side_num_keys - 1);
         *internal_node_num_keys(old_node) -= 1;
