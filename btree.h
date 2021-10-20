@@ -595,9 +595,10 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     *internal_node_num_keys(parent) = old_num_keys + 1;
     uint32_t original_right_child_page_num = *internal_node_right_child(parent);
     void *original_right_child = get_page(table->pager, original_right_child_page_num);
+    uint32_t original_right_child_max_key = get_node_max_key(original_right_child);
 
-    // if (child_max_key > get_node_max_key(right_child))
-    if (index >= old_num_keys)
+    // optimize: 或许改成 child_min_key > original_right_child_max_key 比较好
+    if (child_max_key > original_right_child_max_key)
     {
         /** 
          * if the `child` will become the rightmost one of parent
@@ -607,7 +608,7 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
         // original rightmost become the last common child
         *internal_node_child(parent, old_num_keys) = original_right_child_page_num;
         // update last common child's key
-        *internal_node_key(parent, old_num_keys) = get_node_max_key(original_right_child);
+        *internal_node_key(parent, old_num_keys) = original_right_child_max_key;
         // the `child` becomes the rightmost one
         *internal_node_right_child(parent) = child_page_num;
 
@@ -637,7 +638,7 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     {
         printf("Need to implement splitting internal node\n");
         internal_node_split(table, parent_page_num);
-        print_btree(table->pager, table->root_page_num, 0);
+        // print_btree(table->pager, table->root_page_num, 0);
     }
 }
 
@@ -673,6 +674,7 @@ void *internal_create_new_root(table_t *table, uint32_t right_child_page_num)
     *node_parent(left_child) = table->root_page_num;
     *node_parent(right_child) = table->root_page_num;
 
+    // adjust its children's parent
     for (uint32_t idx = 0; idx < *internal_node_num_keys(left_child); idx++)
     {
         void *cell = internal_node_cell(left_child, idx);
