@@ -6,10 +6,13 @@
  **/
 void serialize_row(row_t *source, void *dest);
 void *cursor_value(cursor_t *cursor);
+void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level);
 
-#define TODO(filename, line_num) do {                   \
-    printf("TODO at %s: %d\n", filename, line_num); \
-    assert(0);                                      \
-} while(0)
+#define TODO(filename, line_num)                        \
+    do                                                  \
+    {                                                   \
+        printf("TODO at %s: %d\n", filename, line_num); \
+        assert(0);                                      \
+    } while (0)
 
 #endif

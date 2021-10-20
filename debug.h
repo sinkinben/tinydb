@@ -52,7 +52,7 @@ void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level)
     {
         num_keys = *internal_node_num_keys(node);
         indent(indent_level);
-        printf("- internal (size %d)\n", num_keys);
+        printf("- internal (size %d, page %d, parent %d)\n", num_keys, page_num, *node_parent(node));
         for (uint32_t i = 0; i < num_keys; i++)
         {
             child = *internal_node_child(node, i);
@@ -68,7 +68,7 @@ void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level)
     {
         num_keys = *leaf_node_num_cells(node);
         indent(indent_level);
-        printf("- leaf (size %d)\n", num_keys);
+        printf("- leaf (size %d,page %d, parent %d)\n", num_keys, page_num, *node_parent(node));
         for (uint32_t i = 0; i < num_keys; i++)
         {
             indent(indent_level + 1);

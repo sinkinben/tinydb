@@ -96,7 +96,7 @@ const uint32_t INTERNAL_NODE_CHILD_SIZE = sizeof(uint32_t);
 const uint32_t INTERNAL_NODE_CELL_SIZE = INTERNAL_NODE_CHILD_SIZE + INTERNAL_NODE_KEY_SIZE;
 
 const uint32_t INTERNAL_NODE_SPACE_FOR_CELLS = PAGE_SIZE - INTERNAL_NODE_HEADER_SIZE;
-// const uint32_t INTERNAL_NODE_MAX_CELLS = INTERNAL_NODE_SPACE_FOR_CELLS / INTERNAL_NODE_CELL_SIZE;
+// const uint32_t INTERNAL_NODE_MAX_CELLS = INTERNAL_NODE_SPACE_FOR_CELLS / INTERNAL_NODE_CELL_SIZE - 1;
 // set a small value for debugging/testing
 const uint32_t INTERNAL_NODE_MAX_CELLS = 3;
 
@@ -349,7 +349,7 @@ void leaf_node_insert(cursor_t *cursor, uint32_t key, row_t *value)
     if (num_cells >= LEAF_NODE_MAX_CELLS)
     {
         // current node(page) is full
-        // printf("Need to implement splitting a leaf node.\n");
+        printf("Need to implement splitting a leaf node.\n");
         // exit(EXIT_FAILURE);
         leaf_node_split_and_insert(cursor, key, value);
         return;
@@ -554,19 +554,12 @@ void update_internal_node_key(void *node, uint32_t old_key, uint32_t new_key)
 {
     uint32_t old_child_index = internal_node_find_cell(node, old_key);
     uint32_t num_keys = *(internal_node_num_keys(node));
-    if (old_child_index < num_keys)
-    {
-        *internal_node_key(node, old_child_index) = new_key;
-    }
-    else
-    {
-        printf("[update_internal_node_key] should not update, but add to tail\n");
-    }
+    *internal_node_key(node, old_child_index) = new_key;
 
     // debugging
     printf("[update_internal_node_key] old_key = %d, new_key = %d, index = %d\n", old_key, new_key, old_child_index);
     printf("[update internal node key] ");
-    for (uint32_t i = 0; i < num_keys; i++)
+    for (uint32_t i = 0; i <= num_keys; i++)
     {
         printf("%d, ", *internal_node_key(node, i));
     }
@@ -574,6 +567,7 @@ void update_internal_node_key(void *node, uint32_t old_key, uint32_t new_key)
 }
 
 // Add a new child/key pair to parent that corresponds to child
+void internal_node_split(table_t *table, uint32_t parent_page_num);
 void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t child_page_num)
 {
     void *parent = get_page(table->pager, parent_page_num);
@@ -587,17 +581,17 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     uint32_t index = internal_node_find_cell(parent, child_max_key);
 
     uint32_t old_num_keys = *internal_node_num_keys(parent);
-    
 
     printf("[internal node insert] old_num_keys = %d, new_child_max_key = %d, index = %d\n",
            old_num_keys, child_max_key, index);
 
     // if the parent need to be splitted
-    if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
-    {
-        printf("Need to implement splitting internal node\n");
-        exit(EXIT_FAILURE);
-    }
+    // if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
+    // {
+    //     printf("Need to implement splitting internal node\n");
+    //     internal_node_split(table, parent_page_num, child_page_num);
+    //     exit(EXIT_FAILURE);
+    // }
     *internal_node_num_keys(parent) = old_num_keys + 1;
     uint32_t original_right_child_page_num = *internal_node_right_child(parent);
     void *original_right_child = get_page(table->pager, original_right_child_page_num);
@@ -632,8 +626,125 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
         *internal_node_key(parent, index) = child_max_key;
         *internal_node_child(parent, index) = child_page_num;
     }
+
+    // We have left a extra cell room for this case:
+    //   - we have inserted the new_key(new_child) into internal node
+    //   - but if old_nums_key == INTERNAL_NODE_MAX_CELLS
+    //   - we need to split the internal node into two internal nodes
+    print_btree(table->pager, table->root_page_num, 0);
+
+    if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
+    {
+        printf("Need to implement splitting internal node\n");
+        internal_node_split(table, parent_page_num);
+        print_btree(table->pager, table->root_page_num, 0);
+    }
 }
 
+void *internal_create_new_root(table_t *table, uint32_t right_child_page_num)
+{
+    void *root = get_page(table->pager, table->root_page_num);
 
+    assert(get_node_type(root) == NODE_INTERNAL);
+
+    void *right_child = get_page(table->pager, right_child_page_num);
+
+    // create a new page to left child
+    uint32_t left_child_page_num = get_unused_page_num(table->pager);
+    void *left_child = get_page(table->pager, left_child_page_num);
+
+    // Left child has data copied from old root
+    memcpy(left_child, root, PAGE_SIZE);
+    set_node_root(left_child, false);
+
+    // now, root become new root
+    init_internal_node(root);
+    set_node_root(root, true);
+
+    // adjust children pointer of root
+    *internal_node_num_keys(root) = 1;
+    *internal_node_child(root, 0) = left_child_page_num;
+
+    uint32_t left_child_max_key = get_node_max_key(left_child);
+    *internal_node_key(root, 0) = left_child_max_key;
+    *internal_node_right_child(root) = right_child_page_num;
+
+    // update parent pointer
+    *node_parent(left_child) = table->root_page_num;
+    *node_parent(right_child) = table->root_page_num;
+
+    for (uint32_t idx = 0; idx < *internal_node_num_keys(left_child); idx++)
+    {
+        void *cell = internal_node_cell(left_child, idx);
+        *node_parent(get_page(table->pager, *(uint32_t *)cell)) = left_child_page_num;
+    }
+
+    // return the new left child
+    return left_child;
+}
+
+void internal_node_split(table_t *table, uint32_t old_page_num)
+{
+    void *const pager = table->pager;
+    void *const old_node = get_page(pager, old_page_num);
+
+    uint32_t original_right_child_page_num = *internal_node_right_child(old_node);
+    void *origin_right_child = get_page(pager, original_right_child_page_num);
+
+    uint32_t parent_page_num = *node_parent(old_node);
+
+    // remember: we have ` n = num_keys` keys, and n+1 children
+    uint32_t num_keys = *internal_node_num_keys(old_node);
+    assert(num_keys == INTERNAL_NODE_MAX_CELLS + 1);
+
+    // this key will become the new parent's first key
+    uint32_t mid_key = *internal_node_key(old_node, num_keys / 2);
+
+    // the old_node will become left side,
+    // the new_node will become right side.
+    uint32_t left_side_num_keys = (num_keys + 1) / 2;
+    uint32_t right_side_num_keys = num_keys - left_side_num_keys;
+
+    uint32_t new_node_page_num = get_unused_page_num(pager);
+    void *new_node = get_page(pager, new_node_page_num);
+    init_internal_node(new_node);
+
+    uint32_t idx_within_right = 0;
+    for (uint32_t cell_idx = left_side_num_keys; cell_idx < num_keys; cell_idx++)
+    {
+        void *dest = internal_node_cell(new_node, idx_within_right++);
+        void *source = internal_node_cell(old_node, cell_idx);
+        memcpy(dest, source, INTERNAL_NODE_CELL_SIZE);
+        *node_parent(get_page(pager, *(uint32_t *)dest)) = new_node_page_num;
+        // memcpy(internal_node_cell(new_node, idx_within_right++),
+        //        internal_node_cell(old_node, cell_idx),
+        //        INTERNAL_NODE_CELL_SIZE);
+    }
+    assert(idx_within_right == right_side_num_keys);
+    *internal_node_num_keys(old_node) = left_side_num_keys;
+    *internal_node_num_keys(new_node) = right_side_num_keys;
+
+    // adjust the last cell to rightmost child
+    *internal_node_right_child(new_node) = original_right_child_page_num;
+    *node_parent(origin_right_child) = new_node_page_num;
+
+    *node_parent(new_node) = parent_page_num;
+
+    if (is_root_node(old_node))
+    {
+        printf("[internal_node_split] create new root\n");
+        void *new_left_child = internal_create_new_root(table, new_node_page_num);
+        *internal_node_right_child(new_left_child) = *internal_node_child(new_left_child, left_side_num_keys - 1);
+        *internal_node_num_keys(new_left_child) -= 1;
+    }
+    else
+    {
+        printf("[internal_node_split] else case: parent_page_num = %d\n",
+               parent_page_num);
+        internal_node_insert(table, parent_page_num, new_node_page_num);
+        *internal_node_right_child(old_node) = *internal_node_child(old_node, left_side_num_keys - 1);
+        *internal_node_num_keys(old_node) -= 1;
+    }
+}
 
 #endif
