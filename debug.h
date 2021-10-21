@@ -1,6 +1,11 @@
 #include "btree.h"
 #ifndef DEBUG_H
 #define DEBUG_H
+void print_max_cells()
+{
+    printf("INTERNAL_NODE_MAX_CELLS = %u\n", INTERNAL_NODE_MAX_CELLS);
+    printf("LEAF_NODE_MAX_CELLS = %u\n", LEAF_NODE_MAX_CELLS);
+}
 void print_constants()
 {
     printf("table row size: %d\n", ROW_SIZE);

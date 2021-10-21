@@ -48,8 +48,11 @@ const uint32_t LEAF_NODE_VALUE_OFFSET = LEAF_NODE_KEY_OFFSET + LEAF_NODE_KEY_SIZ
 const uint32_t LEAF_NODE_CELL_SIZE = LEAF_NODE_KEY_SIZE + LEAF_NODE_VALUE_SIZE;
 const uint32_t LEAF_NODE_SPACE_FOR_CELLS = PAGE_SIZE - LEAF_NODE_HEADER_SIZE;
 // we can set it with 3 for debugging
+#ifdef CUSTOMED_LEAF_MAX_CELLS
+const uint32_t LEAF_NODE_MAX_CELLS = CUSTOMED_LEAF_MAX_CELLS;
+#else
 const uint32_t LEAF_NODE_MAX_CELLS = LEAF_NODE_SPACE_FOR_CELLS / LEAF_NODE_CELL_SIZE;
-// const uint32_t LEAF_NODE_MAX_CELLS = 3;
+#endif
 
 // leaf node 已有 n = LEAF_NODE_MAX_CELLS  个 key
 // 插入新 key 值时, 需要分裂
@@ -96,12 +99,16 @@ const uint32_t INTERNAL_NODE_CHILD_SIZE = sizeof(uint32_t);
 const uint32_t INTERNAL_NODE_CELL_SIZE = INTERNAL_NODE_CHILD_SIZE + INTERNAL_NODE_KEY_SIZE;
 
 const uint32_t INTERNAL_NODE_SPACE_FOR_CELLS = PAGE_SIZE - INTERNAL_NODE_HEADER_SIZE;
-const uint32_t INTERNAL_NODE_MAX_CELLS = INTERNAL_NODE_SPACE_FOR_CELLS / INTERNAL_NODE_CELL_SIZE - 1;
 // set a small value for debugging/testing
-// const uint32_t INTERNAL_NODE_MAX_CELLS = 3;
+#ifdef CUSTOMED_INTERNAL_MAX_CELLS
+const uint32_t INTERNAL_NODE_MAX_CELLS = CUSTOMED_INTERNAL_MAX_CELLS;
+#else
+const uint32_t INTERNAL_NODE_MAX_CELLS = INTERNAL_NODE_SPACE_FOR_CELLS / INTERNAL_NODE_CELL_SIZE - 1;
+#endif
 
 // 函数声明
-uint32_t *leaf_node_num_cells(void *);
+uint32_t *
+leaf_node_num_cells(void *);
 uint32_t *leaf_node_next_leaf(void *);
 uint32_t *internal_node_num_keys(void *);
 uint32_t *internal_node_child(void *, uint32_t);

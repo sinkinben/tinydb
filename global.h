@@ -15,4 +15,7 @@ void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level);
         assert(0);                                      \
     } while (0)
 
+// #define CUSTOMED_LEAF_MAX_CELLS ((uint32_t)3)
+// #define CUSTOMED_INTERNAL_MAX_CELLS ((uint32_t)3)
+
 #endif

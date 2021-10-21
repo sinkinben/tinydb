@@ -82,6 +82,11 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
         print_help();
         return META_COMMAND_SUCCESS;
     }
+    else if (strcmp(input->buffer, ".cells") == 0)
+    {
+        print_max_cells();
+        return META_COMMAND_SUCCESS;
+    }
     else
     {
         return META_COMMAND_UNRECOGNIZED_COMMAND;
