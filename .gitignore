@@ -4,5 +4,6 @@
 .bundle
 bin/
 test.c
+test.rb
 tinydb
 mydb.db

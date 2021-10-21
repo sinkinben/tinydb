@@ -21,7 +21,7 @@ void print_constants()
     printf("    - key size: %d\n", LEAF_NODE_KEY_SIZE);
     printf("    - row size: %d\n", LEAF_NODE_VALUE_SIZE);
     printf("  + spaces for cells: %d\n", LEAF_NODE_SPACE_FOR_CELLS);
-    printf("  + max cells:        %d\n", LEAF_NODE_MAX_CELLS);
+    // printf("  + max cells:        %d\n", LEAF_NODE_MAX_CELLS);
 
     printf("internal node:\n");
     printf("  + header size:      %d\n", INTERNAL_NODE_HEADER_SIZE);
@@ -31,7 +31,7 @@ void print_constants()
     printf("    - child: %d\n", INTERNAL_NODE_CHILD_SIZE);
     printf("    - key:   %d\n", INTERNAL_NODE_KEY_SIZE);
     printf("  + spaces for cells: %d\n", INTERNAL_NODE_SPACE_FOR_CELLS);
-    printf("  + max cells:        %d\n", INTERNAL_NODE_MAX_CELLS);
+    // printf("  + max cells:        %d\n", INTERNAL_NODE_MAX_CELLS);
 }
 
 void indent(int32_t level)

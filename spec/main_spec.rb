@@ -1,9 +1,9 @@
 describe 'database' do
   before do
-    `rm mydb.db`
     `make build`
   end
   def run_script(commands)
+    system("if [ -f mydb.db ]; then rm mydb.db; fi")
     raw_output = nil
     IO.popen("./tinydb mydb.db", "r+") do |pipe|
       commands.each do |command|
@@ -24,112 +24,54 @@ describe 'database' do
     raw_output.split("\n")
   end
 
-  # it 'inserts and retrieves a row' do
-  #   result = run_script([
-  #     "insert 1 user1 person1@example.com",
-  #     "select",
-  #     ".exit",
-  #   ])
-  #   expect(result).to match_array([
-  #     "tinydb > Executed.",
-  #     "tinydb > (1, user1, person1@example.com)",
-  #     "Executed.",
-  #     "tinydb > ",
-  #   ])
-  # end
-
-  # When we implement btree as primary key index, the table can't be full
-  it 'insert a large number of rows' do
-    n = 6523
-    print(n)
-    list = Array.new(n) {|e| e = e + 1}
-    shuffle_list = list.shuffle
-    script = shuffle_list.map do |i|
-      "insert #{i} user#{i} person#{i}@example.com"
-  end
-  script << "select"
-  script << ".exit"
-  result = run_script(script)
-
-  expected_values = []
-  list.map do |i|
-    expected_values.append("(#{i}, user#{i}, person#{i}@example.com)")
-  end
-  expected_values[0] = "tinydb > " + expected_values[0]
-
-  select_results = []
-  result.map do |line|
-    len = line.length
-    if line[len-5..len-1] == ".com)"
-      select_results.append(line)
-    end
-  end
-
-  # result.map do |s|
-  #   print(s + "\n")
-  # end
-
-  # print(select_results)
-  # print(expected_values)
-
-  expect(select_results.length).to match(n)
-  expect(select_results).to match_array(
-    expected_values
-  )
+  it 'inserts and retrieves a row' do
+    result = run_script([
+      "insert 1 user1 person1@example.com",
+      "select",
+      ".exit",
+    ])
+    expect(result).to match_array([
+      "tinydb > Executed.",
+      "tinydb > (1, user1, person1@example.com)",
+      "total 1 rows",
+      "Executed.",
+      "tinydb > ",
+    ])
   end
 
   it 'allows inserting strings that are the maximum length' do
-  long_username = "a"*32
-  long_email = "a"*255
-  script = [
-    "insert 1 #{long_username} #{long_email}",
-    "select",
-    ".exit",
-  ]
-  result = run_script(script)
-  expect(result).to match_array([
-    "tinydb > Executed.",
-    "tinydb > (1, #{long_username}, #{long_email})",
-    "Executed.",
-    "tinydb > ",
-  ])
+    long_username = "a"*32
+    long_email = "a"*255
+    script = [
+      "insert 1 #{long_username} #{long_email}",
+      "select",
+      ".exit",
+    ]
+    result = run_script(script)
+    expect(result).to match_array([
+      "tinydb > Executed.",
+      "tinydb > (1, #{long_username}, #{long_email})",
+      "total 1 rows",
+      "Executed.",
+      "tinydb > ",
+    ])
   end
 
   it 'prints error message if strings are too long' do
-  long_username = "a"*33
-  long_email = "a"*256
-  script = [
-    "insert 1 #{long_username} #{long_email}",
-    "select",
-    ".exit",
-  ]
-  result = run_script(script)
-  expect(result).to match_array([
-    "tinydb > String is too long.",
-    "tinydb > Executed.",
-    "tinydb > ",
-  ])
-  end
-
-
-  it 'keeps data after closing connection' do
-  result1 = run_script([
-    "insert 1 user1 person1@example.com",
-    ".exit",
-  ])
-  expect(result1).to match_array([
-    "tinydb > Executed.",
-    "tinydb > ",
-  ])
-  result2 = run_script([
-    "select",
-    ".exit",
-  ])
-  expect(result2).to match_array([
-    "tinydb > (1, user1, person1@example.com)",
-    "Executed.",
-    "tinydb > ",
-  ])
+    long_username = "a"*33
+    long_email = "a"*256
+    script = [
+      "insert 1 #{long_username} #{long_email}",
+      "select",
+      ".exit",
+    ]
+    result = run_script(script)
+    expect(result).to match_array([
+      "tinydb > String is too long.",
+      "tinydb > total 0 rows",
+      "Executed.",
+      "tinydb > ",
+    ])
   end
 
   it 'allows printing out the structure of a one-node btree' do
@@ -145,7 +87,7 @@ describe 'database' do
       "tinydb > Executed.",
       "tinydb > Executed.",
       "tinydb > Tree:",
-      "- leaf (size 3)",
+      "- leaf (size 3, page 0, parent 0, next 0)",
       "  - 1",
       "  - 2",
       "  - 3",
@@ -178,7 +120,7 @@ describe 'database' do
       "    - key size: 4",
       "    - row size: 293",
       "  + spaces for cells: 4082",
-      "  + max cells:        13",
+      # "  + max cells:        13",
       "internal node:",
       "  + header size:      14",
       "    - num_cells:   4",
@@ -187,7 +129,7 @@ describe 'database' do
       "    - child: 4",
       "    - key:   4",
       "  + spaces for cells: 4082",
-      "  + max cells:        3",
+      # "  + max cells:        3",
       "tinydb > ",
     ])
   end
@@ -204,158 +146,69 @@ describe 'database' do
       "tinydb > Executed.",
       "tinydb > Execute Error: Duplicate key.",
       "tinydb > (1, user1, person1@example.com)",
+      "total 1 rows",
       "Executed.",
       "tinydb > ",
     ])
   end
 
-  it 'print out the structure of a 3-nodes btree' do
-    script = (1..14).map do |i|
-      "insert #{i} user#{i} person#{i}@example.com"
+  # insert n rows (or with shuffle)
+  def run_batch_insertion(n, need_shuffle)
+    print("\n#{n} rows, ", "shuffle: #{need_shuffle} \n")
+    seq_list = Array.new(n) {|e| e = e + 1}
+    input_list = seq_list
+    if (need_shuffle)
+      input_list = input_list.shuffle
     end
-    script << ".btree"
-    script << "insert 15 user15 person15@example.com"
-    script << ".exit"
-    result = run_script(script)
-
-    expect(result[14...(result.length)]).to match_array([
-      "tinydb > Tree:",
-      "- internal (size 1)",
-      "  - leaf (size 7)",
-      "    - 1",
-      "    - 2",
-      "    - 3",
-      "    - 4",
-      "    - 5",
-      "    - 6",
-      "    - 7",
-      "  - key 7",
-      "  - leaf (size 7)",
-      "    - 8",
-      "    - 9",
-      "    - 10",
-      "    - 11",
-      "    - 12",
-      "    - 13",
-      "    - 14",
-      "tinydb > Executed.",
-      "tinydb > "
-    ])
-  end
-
-  it 'prints all rows in a multi-level tree' do
-    script = []
-    (1..20).each do |i|
-      script << "insert #{i} user#{i} person#{i}@example.com"
-    end
+    script = input_list.map do |i| "insert #{i} #{i} #{i}@sjtu.com" end
     script << "select"
     script << ".exit"
     result = run_script(script)
-
-    expect(result[20...result.length]).to match_array([
-      "tinydb > (1, user1, person1@example.com)",
-      "(2, user2, person2@example.com)",
-      "(3, user3, person3@example.com)",
-      "(4, user4, person4@example.com)",
-      "(5, user5, person5@example.com)",
-      "(6, user6, person6@example.com)",
-      "(7, user7, person7@example.com)",
-      "(8, user8, person8@example.com)",
-      "(9, user9, person9@example.com)",
-      "(10, user10, person10@example.com)",
-      "(11, user11, person11@example.com)",
-      "(12, user12, person12@example.com)",
-      "(13, user13, person13@example.com)",
-      "(14, user14, person14@example.com)",
-      "(15, user15, person15@example.com)",
-      "(16, user16, person16@example.com)",
-      "(17, user17, person17@example.com)",
-      "(18, user18, person18@example.com)",
-      "(19, user19, person19@example.com)",
-      "(20, user20, person20@example.com)",
-      "Executed.", "tinydb > ",
-    ])
+    
+    expected_values = seq_list.map do |i| "(#{i}, #{i}, #{i}@sjtu.com)" end
+    expected_values[0] = "tinydb > " + expected_values[0]
+    expected_values.append(
+      "total #{n} rows",
+      "Executed.",
+      "tinydb > "
+    )
+    # expected_values.map do |s| print(s + "\n") end
+    # result.last(n+3).map do |s| print(s + "\n") end
+    expect(result.last(n+3)).to match_array(expected_values)
   end
 
-  it 'allows printing out the structure of a 4-leaf-node btree' do
-    script = [
-      "insert 18 user18 person18@example.com",
-      "insert 7 user7 person7@example.com",
-      "insert 10 user10 person10@example.com",
-      "insert 29 user29 person29@example.com",
-      "insert 23 user23 person23@example.com",
-      "insert 4 user4 person4@example.com",
-      "insert 14 user14 person14@example.com",
-      "insert 30 user30 person30@example.com",
-      "insert 15 user15 person15@example.com",
-      "insert 26 user26 person26@example.com",
-      "insert 22 user22 person22@example.com",
-      "insert 19 user19 person19@example.com",
-      "insert 2 user2 person2@example.com",
-      "insert 1 user1 person1@example.com",
-      "insert 21 user21 person21@example.com",
-      "insert 11 user11 person11@example.com",
-      "insert 6 user6 person6@example.com",
-      "insert 20 user20 person20@example.com",
-      "insert 5 user5 person5@example.com",
-      "insert 8 user8 person8@example.com",
-      "insert 9 user9 person9@example.com",
-      "insert 3 user3 person3@example.com",
-      "insert 12 user12 person12@example.com",
-      "insert 27 user27 person27@example.com",
-      "insert 17 user17 person17@example.com",
-      "insert 16 user16 person16@example.com",
-      "insert 13 user13 person13@example.com",
-      "insert 24 user24 person24@example.com",
-      "insert 25 user25 person25@example.com",
-      "insert 28 user28 person28@example.com",
-      ".btree",
-      ".exit",
-    ]
-    result = run_script(script)
-    # puts("")
-    # (result[30..]).each{ |item| puts(item) }
-    expect(result[30..]).to match_array([
-      "tinydb > Tree:",
-      "- internal (size 3)",
-      "  - leaf (size 7)",
-      "    - 1",
-      "    - 2",
-      "    - 3",
-      "    - 4",
-      "    - 5",
-      "    - 6",
-      "    - 7",
-      "  - key 7",
-      "  - leaf (size 8)",
-      "    - 8",
-      "    - 9",
-      "    - 10",
-      "    - 11",
-      "    - 12",
-      "    - 13",
-      "    - 14",
-      "    - 15",
-      "  - key 15",
-      "  - leaf (size 7)",
-      "    - 16",
-      "    - 17",
-      "    - 18",
-      "    - 19",
-      "    - 20",
-      "    - 21",
-      "    - 22",
-      "  - key 22",
-      "  - leaf (size 8)",
-      "    - 23",
-      "    - 24",
-      "    - 25",
-      "    - 26",
-      "    - 27",
-      "    - 28",
-      "    - 29",
-      "    - 30",
-      "tinydb > ",
-    ])
+  # ----------------------------------------
+  it '500 rows with increasing id' do
+    run_batch_insertion(500, false)
+  end
+
+  it '500 rows with shuffling id' do
+    run_batch_insertion(500, true)
+  end
+
+  # ----------------------------------------
+  it '1000 rows with increasing id' do
+    run_batch_insertion(1000, false)
+  end
+
+  it '1000 rows with shuffling id' do
+    run_batch_insertion(1000, true)
+  end
+  # ----------------------------------------
+  it '5000 rows with increasing id' do
+    run_batch_insertion(5000, false)
+  end
+
+  it '5000 rows with shuffling id' do
+    run_batch_insertion(5000, true)
+  end
+
+  # ----------------------------------------
+  it '6000 rows with increasing id' do
+    run_batch_insertion(6000, false)
+  end
+
+  it '6000 rows with shuffling id' do
+    run_batch_insertion(6000, true)
   end
 end
