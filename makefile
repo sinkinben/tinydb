@@ -1,5 +1,7 @@
 build:
 	gcc main.c -o tinydb
+clean:
+	rm *.db
 run:
 	make build
 	./tinydb mydb.db

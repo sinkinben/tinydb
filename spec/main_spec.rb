@@ -24,31 +24,58 @@ describe 'database' do
     raw_output.split("\n")
   end
 
-  it 'inserts and retrieves a row' do
-    result = run_script([
-      "insert 1 user1 person1@example.com",
-      "select",
-      ".exit",
-    ])
-    expect(result).to match_array([
-      "tinydb > Executed.",
-      "tinydb > (1, user1, person1@example.com)",
-      "Executed.",
-      "tinydb > ",
-    ])
-  end
+  # it 'inserts and retrieves a row' do
+  #   result = run_script([
+  #     "insert 1 user1 person1@example.com",
+  #     "select",
+  #     ".exit",
+  #   ])
+  #   expect(result).to match_array([
+  #     "tinydb > Executed.",
+  #     "tinydb > (1, user1, person1@example.com)",
+  #     "Executed.",
+  #     "tinydb > ",
+  #   ])
+  # end
 
   # When we implement btree as primary key index, the table can't be full
-  it 'prints error message when table is full' do
-    script = (1..1401).map do |i|
+  it 'insert a large number of rows' do
+    n = 6523
+    print(n)
+    list = Array.new(n) {|e| e = e + 1}
+    shuffle_list = list.shuffle
+    script = shuffle_list.map do |i|
       "insert #{i} user#{i} person#{i}@example.com"
   end
+  script << "select"
   script << ".exit"
   result = run_script(script)
-  expect(result.last(2)).to match_array([
-    "tinydb > Executed.",
-    "tinydb > Need to implement splitting internal node",
-  ])
+
+  expected_values = []
+  list.map do |i|
+    expected_values.append("(#{i}, user#{i}, person#{i}@example.com)")
+  end
+  expected_values[0] = "tinydb > " + expected_values[0]
+
+  select_results = []
+  result.map do |line|
+    len = line.length
+    if line[len-5..len-1] == ".com)"
+      select_results.append(line)
+    end
+  end
+
+  # result.map do |s|
+  #   print(s + "\n")
+  # end
+
+  # print(select_results)
+  # print(expected_values)
+
+  expect(select_results.length).to match(n)
+  expect(select_results).to match_array(
+    expected_values
+  )
   end
 
   it 'allows inserting strings that are the maximum length' do

@@ -165,6 +165,8 @@ uint32_t get_unused_page_num(pager_t *pager)
 {
     // 总是在文件末尾新增一页
     // TODO: 如果中间存在 delete 引起的空页, 那么应该优先返回这些空页
+    // printf("[get_unused_page_num] num pages = %u\n", pager->num_pages);
+    assert(pager->num_pages < TABLE_MAX_PAGES);
     return pager->num_pages;
 }
 
@@ -617,7 +619,7 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     }
     else
     {
-        // insert cell(child_page_num, child_max_key) into parent
+        // printf("[internal node insert] index = %u\n", index);
         for (uint32_t i = old_num_keys; i > index; i--)
         {
             void *dest = internal_node_cell(parent, i);
@@ -632,7 +634,6 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     //   - we have inserted the new_key(new_child) into internal node
     //   - but if old_nums_key == INTERNAL_NODE_MAX_CELLS
     //   - we need to split the internal node into two internal nodes
-    
     // print_btree(table->pager, table->root_page_num, 0);
 
     if (old_num_keys >= INTERNAL_NODE_MAX_CELLS)
@@ -691,17 +692,17 @@ void internal_node_split(table_t *table, uint32_t old_page_num)
     void *const pager = table->pager;
     void *const old_node = get_page(pager, old_page_num);
 
+    uint32_t old_max_key = get_node_max_key(old_node);
+
     uint32_t original_right_child_page_num = *internal_node_right_child(old_node);
     void *origin_right_child = get_page(pager, original_right_child_page_num);
 
     uint32_t parent_page_num = *node_parent(old_node);
+    void *const parent = get_page(pager, parent_page_num);
 
     // remember: we have ` n = num_keys` keys, and n+1 children
     uint32_t num_keys = *internal_node_num_keys(old_node);
     assert(num_keys == INTERNAL_NODE_MAX_CELLS + 1);
-
-    // this key will become the new parent's first key
-    uint32_t mid_key = *internal_node_key(old_node, num_keys / 2);
 
     // the old_node will become left side,
     // the new_node will become right side.
@@ -743,7 +744,12 @@ void internal_node_split(table_t *table, uint32_t old_page_num)
     else
     {
         // printf("[internal_node_split] else case: parent_page_num = %d\n", parent_page_num);
+        uint32_t new_max_key = get_node_max_key(old_node);
+        // printf("[internal_node_split] oldmax = %u, newmax = %u\n", old_max_key, new_max_key);
+        // assert(0);
+        update_internal_node_key(parent, old_max_key, new_max_key);
         internal_node_insert(table, parent_page_num, new_node_page_num);
+        // must after internal_node_insert
         *internal_node_right_child(old_node) = *internal_node_child(old_node, left_side_num_keys - 1);
         *internal_node_num_keys(old_node) -= 1;
     }

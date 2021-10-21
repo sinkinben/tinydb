@@ -41,12 +41,15 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
 {
     cursor_t *cursor = table_start(table);
     row_t row;
+    uint32_t i = 0;
     while (!(cursor->end_of_table))
     {
         deserialize_row(cursor_value(cursor), &row);
+        i++;
         print_row(&row);
         cursor_advance(cursor);
     }
+    printf("total %d rows\n", i);
     free(cursor);
     return EXECUTE_SUCCESS;
 }
