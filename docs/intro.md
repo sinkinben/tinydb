@@ -95,7 +95,7 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 - 实现 Linux Kernel 的侵入式容器（实现一个链表）。
   - 基于这个链表，实现一个操作 log 链表，然后支持 commit/rollback 等操作。
 - 支持 `commit` ：把内存中修改过的内容持久化到磁盘（目前是 `.exit` 的时候覆盖写入）
-- 支持 `delete` ：删除某个 `key` .
+- ✅ 支持 `delete` ：删除某个 `key` .
   - 目前的 `delete` 是伪删除。
   - 目前只是简单从 leaf node 中删除，不会调整 parent 指针，也不会重新调整 B+Tree 的结构。
   - 这意味着，即使某一行从表中删除，但它依旧会占用磁盘空间。

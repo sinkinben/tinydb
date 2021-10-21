@@ -676,6 +676,8 @@ void *internal_create_new_root(table_t *table, uint32_t right_child_page_num)
     *node_parent(left_child) = table->root_page_num;
     *node_parent(right_child) = table->root_page_num;
 
+    // above code is the same as `create_new_root`
+
     // adjust its children's parent
     for (uint32_t idx = 0; idx < *internal_node_num_keys(left_child); idx++)
     {

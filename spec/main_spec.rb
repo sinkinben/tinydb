@@ -152,6 +152,42 @@ describe 'database' do
     ])
   end
 
+  it 'test udpate' do
+    n = 20
+    list = Array(1..n)
+    script = list.map do |i| "insert #{i} #{i} #{i}@sjtu.edu.cn" end
+    script += list.map do |i| "update #{i} #{i} #{i}" end
+    script << "select"
+    script << ".exit"
+    result = run_script(script)
+    
+    expected_values = list.map do |i| "(#{i}, #{i}, #{i})" end
+    expected_values[0] = "tinydb > " + expected_values[0]
+    expected_values.append(
+      "total #{n} rows", "Executed.", "tinydb > "
+    )
+    # print(result.last(n+3))
+    expect(result.last(n+3)).to match_array(expected_values)
+  end
+
+  it 'test delete' do
+    n = 20
+    list = Array(1..n)
+    script = list.map do |i| "insert #{i} #{i} #{i}" end
+    script += list.find_all{|e| e % 2 == 0}.map do |i| "delete #{i}" end
+    script << "select"
+    script << ".exit"
+
+    result = run_script(script)
+
+    expected_values = list.find_all{|e| e % 2 != 0}.map do |i| "(#{i}, #{i}, #{i})" end
+    expected_values[0] = "tinydb > " + expected_values[0]
+    expected_values.append(
+      "total #{n / 2} rows", "Executed.", "tinydb > "
+    )
+    expect(result.last(n / 2 + 3)).to match_array(expected_values)
+  end
+
   # insert n rows (or with shuffle)
   def run_batch_insertion(n, need_shuffle)
     print("\n#{n} rows, ", "shuffle: #{need_shuffle} \n")
