@@ -18,7 +18,6 @@ trans_t *trans = NULL;
 // this function will run before main
 void __attribute__((constructor)) init_transaction()
 {
-    printf("%u\n", sizeof(trans_t));
     trans = (trans_t *)malloc(sizeof(trans_t));
     init_list_head(&(trans->entry));
 }
