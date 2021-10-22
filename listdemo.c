@@ -38,6 +38,8 @@ int main()
         free(list_entry(pos, node_t, entry));
     }
 
+    printf("empty = %d\n", list_empty(&(head->entry)));
+
     // free head
     free(head);
 }
