@@ -1,58 +1,3 @@
-## 侵入式容器 (Intrusive Container)
-
-以双向链表为例子。
-
-使用的例子：
-
-```c
-#include "list.h"
-#include <stdlib.h>
-typedef struct
-{
-    int value;
-    list_node_t entry;
-} node_t;
-int main()
-{
-    int i = 0;
-    node_t *p;
-    list_node_t *pos;
-
-    // allocate a dummy head node
-    node_t *head = (node_t *)malloc(sizeof(node_t));
-    init_list_head(&head->entry);
-
-    // add nodes
-    for (i = 0; i < 10; i++)
-    {
-        p = (node_t *)malloc(sizeof(node_t));
-        p->value = i + 1;
-        list_add_tail(&p->entry, &head->entry);
-    }
-
-    // traversal
-    list_for_each(pos, &head->entry)
-    {
-        printf("%d, ", list_entry(pos, node_t, entry)->value);
-    }
-
-    // free nodes
-    list_node_t *next;
-    list_for_each_safe(pos, next, &head->entry)
-    {
-        free(list_entry(pos, node_t, entry));
-    }
-
-    // free head
-    free(head);
-}
-```
-
-
-
-`list.h` 的具体实现：
-
-```c
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -111,9 +56,9 @@ static inline bool list_empty(const list_node_t *head)
 /**
  * - https://www.kernel.org/doc/htmldocs/kernel-api/API-list-empty-careful.html
  * - 同时判断头指针的 next 和 prev, 仅当两者都指向自己时才返回真
- * - 这 API 是为了处理: 其他 CPU 正在处理同一个链表而造成 next, prev 不一致的情况
- * - 这一安全保障能力有限: 除非其他 CPU 的链表操作只有 list_del_init(), 否则仍然不能保证安全
- * - 还是需要锁机制 
+ * - 这主要是为了应付另一个 CPU 正在处理同一个链表而造成 next, prev 不一致的情况
+ * - 这一安全保障能力有限：除非其他 CPU 的链表操作只有 list_del_init(), 否则仍然不能保证安全
+ * - 还是得加锁机制 
  **/
 static inline bool list_empty_careful(const list_node_t *head)
 {
@@ -177,13 +122,3 @@ static inline void list_move_tail(list_node_t *node, list_node_t *head)
 // TODO: list_splice
 
 #endif
-```
-
-
-
-
-
-## 参考
-
-- https://www.cnblogs.com/zhuyp1015/archive/2012/06/02/2532240.html
-
