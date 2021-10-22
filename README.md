@@ -1,5 +1,7 @@
 ## tinydb
 
+![Code Grade](https://www.code-inspector.com/project/29486/status/svg) ![Code Quality Score](https://www.code-inspector.com/project/29486/score/svg) 
+
 A tiny and dummy database built by myself.
 
 
@@ -103,6 +105,8 @@ From so far, `tinydb` supports these sql statement:
 - `select`
 - `delete`
 - `update`
+- `commit`
+- `rollback`
 
 And it also support some meta commands (for debugging):
 
