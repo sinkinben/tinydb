@@ -39,7 +39,7 @@ void print_prompt()
 
 void read_input(buffer_t *input)
 {
-    size_t bytes_read = getline(&(input->buffer), &(input->buffer_length), stdin);
+    ssize_t bytes_read = getline(&(input->buffer), &(input->buffer_length), stdin);
 
     if (bytes_read <= 0)
     {

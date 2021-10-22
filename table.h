@@ -24,7 +24,7 @@ void deserialize_row(void *source, row_t *dest)
 
 void print_row(row_t *row)
 {
-    printf("(%d, %s, %s)\n", row->id, row->username, row->email);
+    printf("(%u, %s, %s)\n", row->id, row->username, row->email);
 }
 
 // opening the database file

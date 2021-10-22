@@ -53,7 +53,7 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
         print_row(&row);
         cursor_advance(cursor);
     }
-    printf("total %d rows\n", i);
+    printf("total %u rows\n", i);
     free(cursor);
     return EXECUTE_SUCCESS;
 }

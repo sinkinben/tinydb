@@ -42,7 +42,7 @@ pager_t *pager_open(const char *filename)
 
 void *get_page(pager_t *pager, uint32_t page_num)
 {
-    if (page_num > TABLE_MAX_PAGES)
+    if (page_num >= TABLE_MAX_PAGES)
     {
         printf("Tried to fetch page number out of bounds. %u > %u\n", page_num, TABLE_MAX_PAGES);
         exit(EXIT_FAILURE);

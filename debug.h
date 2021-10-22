@@ -8,34 +8,34 @@ void print_max_cells()
 }
 void print_constants()
 {
-    printf("table row size: %d\n", ROW_SIZE);
+    printf("table row size: %u\n", ROW_SIZE);
     printf("  - id:       %u\n", ID_SIZE);
     printf("  - username: %u\n", USERNAME_SIZE);
     printf("  - email:    %u\n", EMAIL_SIZE);
 
     printf("common node header size: %d\n", COMMON_NODE_HEADER_SIZE);
-    printf("  - node_type: %d\n", NODE_TYPE_SIZE);
-    printf("  - is_root:   %d\n", IS_ROOT_SIZE);
-    printf("  - parent:    %d\n", PARENT_POINTER_SIZE);
+    printf("  - node_type: %u\n", NODE_TYPE_SIZE);
+    printf("  - is_root:   %u\n", IS_ROOT_SIZE);
+    printf("  - parent:    %u\n", PARENT_POINTER_SIZE);
 
     printf("leaf node:\n");
-    printf("  + header size:      %d\n", LEAF_NODE_HEADER_SIZE);
-    printf("    - num_cells: %d\n", LEAF_NODE_NUM_CELLS_SIZE);
-    printf("    - next_leaf: %d\n", LEAF_NODE_NEXT_LEAF_SIZE);
-    printf("  + cell size:        %d\n", LEAF_NODE_CELL_SIZE);
-    printf("    - key size: %d\n", LEAF_NODE_KEY_SIZE);
-    printf("    - row size: %d\n", LEAF_NODE_VALUE_SIZE);
-    printf("  + spaces for cells: %d\n", LEAF_NODE_SPACE_FOR_CELLS);
+    printf("  + header size:      %u\n", LEAF_NODE_HEADER_SIZE);
+    printf("    - num_cells: %u\n", LEAF_NODE_NUM_CELLS_SIZE);
+    printf("    - next_leaf: %u\n", LEAF_NODE_NEXT_LEAF_SIZE);
+    printf("  + cell size:        %u\n", LEAF_NODE_CELL_SIZE);
+    printf("    - key size: %u\n", LEAF_NODE_KEY_SIZE);
+    printf("    - row size: %u\n", LEAF_NODE_VALUE_SIZE);
+    printf("  + spaces for cells: %u\n", LEAF_NODE_SPACE_FOR_CELLS);
     // printf("  + max cells:        %d\n", LEAF_NODE_MAX_CELLS);
 
     printf("internal node:\n");
-    printf("  + header size:      %d\n", INTERNAL_NODE_HEADER_SIZE);
-    printf("    - num_cells:   %d\n", INTERNAL_NODE_NUM_KEYS_SIZE);
-    printf("    - right_child: %d\n", INTERNAL_NODE_RIGHT_CHILD_SIZE);
-    printf("  + cell size:        %d\n", INTERNAL_NODE_CELL_SIZE);
-    printf("    - child: %d\n", INTERNAL_NODE_CHILD_SIZE);
-    printf("    - key:   %d\n", INTERNAL_NODE_KEY_SIZE);
-    printf("  + spaces for cells: %d\n", INTERNAL_NODE_SPACE_FOR_CELLS);
+    printf("  + header size:      %u\n", INTERNAL_NODE_HEADER_SIZE);
+    printf("    - num_cells:   %u\n", INTERNAL_NODE_NUM_KEYS_SIZE);
+    printf("    - right_child: %u\n", INTERNAL_NODE_RIGHT_CHILD_SIZE);
+    printf("  + cell size:        %u\n", INTERNAL_NODE_CELL_SIZE);
+    printf("    - child: %u\n", INTERNAL_NODE_CHILD_SIZE);
+    printf("    - key:   %u\n", INTERNAL_NODE_KEY_SIZE);
+    printf("  + spaces for cells: %u\n", INTERNAL_NODE_SPACE_FOR_CELLS);
     // printf("  + max cells:        %d\n", INTERNAL_NODE_MAX_CELLS);
 }
 
@@ -57,7 +57,7 @@ void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level)
     {
         num_keys = *internal_node_num_keys(node);
         indent(indent_level);
-        printf("- internal (size %d, page %d, parent %d)\n", num_keys, page_num, *node_parent(node));
+        printf("- internal (size %u, page %u, parent %u)\n", num_keys, page_num, *node_parent(node));
         // printf("- internal (size %d)\n", num_keys);
         for (uint32_t i = 0; i < num_keys; i++)
         {
@@ -65,7 +65,7 @@ void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level)
             print_btree(pager, child, indent_level + 1);
 
             indent(indent_level + 1);
-            printf("- key %d\n", *internal_node_key(node, i));
+            printf("- key %u\n", *internal_node_key(node, i));
         }
         child = *internal_node_right_child(node);
         print_btree(pager, child, indent_level + 1);
@@ -74,13 +74,13 @@ void print_btree(pager_t *pager, uint32_t page_num, uint32_t indent_level)
     {
         num_keys = *leaf_node_num_cells(node);
         indent(indent_level);
-        printf("- leaf (size %d, page %d, parent %d, next %d)\n",
+        printf("- leaf (size %u, page %u, parent %u, next %u)\n",
                num_keys, page_num, *node_parent(node), *leaf_node_next_leaf(node));
         // printf("- leaf (size %d)\n", num_keys);
         for (uint32_t i = 0; i < num_keys; i++)
         {
             indent(indent_level + 1);
-            printf("- %d\n", *leaf_node_key(node, i));
+            printf("- %u\n", *leaf_node_key(node, i));
         }
     }
     else
