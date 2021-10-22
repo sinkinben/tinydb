@@ -69,7 +69,6 @@ This project is inspired by sqlite.
 </svg></div>
 
 
-
 ## Build
 
 This project has only one `.c` file. And you can build it by:
@@ -120,6 +119,7 @@ And it also support some meta commands (for debugging):
 ## Test
 
 ```text
+$ bundle install
 $ bundle exec rspec
 ```
 

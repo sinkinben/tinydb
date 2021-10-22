@@ -1,11 +1,11 @@
-GCC=gcc -Wall
+CC=clang -Wall
 build:
-	$(GCC) main.c -o tinydb
+	$(CC) main.c -o tinydb
 clean:
 	rm *.db
 run:
 	make build
 	./tinydb mydb.db
 test:
-	$(GCC) test.c -o a.out
+	$(CC) test.c -o a.out
 	./a.out
