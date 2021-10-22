@@ -1,5 +1,6 @@
 #include "types.h"
 #include "cursor.h"
+#include "transaction.h"
 #ifndef STATEMENT_H
 #define STATEMENT_H
 
@@ -33,6 +34,7 @@ execute_result_t execute_insert(statement_t *statement, table_t *table)
     }
 
     leaf_node_insert(cursor, row_to_insert->id, row_to_insert);
+    transaction_push(cursor, statement);
     free(cursor);
     return EXECUTE_SUCCESS;
 }
@@ -85,10 +87,9 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
 
 execute_result_t execute_commit(statement_t *statement, table_t *table)
 {
-    // assert(statement->type == STATEMENT_COMMIT);
-    // transaction_commit();
-    // return EXECUTE_SUCCESS;
-    assert(0);
+    assert(statement->type == STATEMENT_COMMIT);
+    transaction_commit();
+    return EXECUTE_SUCCESS;
 }
 
 #endif
