@@ -1,3 +1,4 @@
+#ifdef OPEN_TRANSACTION
 #include "list.h"
 #include "types.h"
 #ifndef TRANSACTION_H
@@ -94,5 +95,5 @@ void transaction_rollback()
     }
     free(last);
 }
-
+#endif
 #endif

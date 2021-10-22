@@ -34,7 +34,9 @@ execute_result_t execute_insert(statement_t *statement, table_t *table)
     }
 
     leaf_node_insert(cursor, row_to_insert->id, row_to_insert);
+#ifdef OPEN_TRANSACTION
     transaction_push(cursor, statement);
+#endif
     free(cursor);
     return EXECUTE_SUCCESS;
 }
@@ -88,7 +90,11 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
 execute_result_t execute_commit(statement_t *statement, table_t *table)
 {
     assert(statement->type == STATEMENT_COMMIT);
+#ifdef OPEN_TRANSACTION
     transaction_commit();
+#else
+    transaction_fatal();
+#endif
     return EXECUTE_SUCCESS;
 }
 
