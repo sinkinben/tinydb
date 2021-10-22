@@ -13,6 +13,7 @@ int main()
 
     // allocate a dummy head node
     node_t *head = (node_t *)malloc(sizeof(node_t));
+    head->value = -1;
     init_list_head(&head->entry);
 
     // add nodes
@@ -33,6 +34,7 @@ int main()
     list_node_t *next;
     list_for_each_safe(pos, next, &head->entry)
     {
+        list_del(pos);
         free(list_entry(pos, node_t, entry));
     }
 
