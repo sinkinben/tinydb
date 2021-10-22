@@ -477,7 +477,7 @@ uint32_t internal_node_find_cell(void *node, uint32_t key)
 cursor_t *internal_node_find(table_t *table, uint32_t page_num, uint32_t key)
 {
     void *node = get_page(table->pager, page_num);
-    uint32_t num_keys = *internal_node_num_keys(node);
+    // uint32_t num_keys = *internal_node_num_keys(node);
 
     uint32_t child_index = internal_node_find_cell(node, key);
 
@@ -562,10 +562,10 @@ uint32_t get_node_max_key(void *node)
 void update_internal_node_key(void *node, uint32_t old_key, uint32_t new_key)
 {
     uint32_t old_child_index = internal_node_find_cell(node, old_key);
-    uint32_t num_keys = *(internal_node_num_keys(node));
     *internal_node_key(node, old_child_index) = new_key;
 
     // debugging
+    // uint32_t num_keys = *(internal_node_num_keys(node));
     // printf("[update_internal_node_key] old_key = %d, new_key = %d, index = %d\n", old_key, new_key, old_child_index);
     // printf("[update internal node key] ");
     // for (uint32_t i = 0; i <= num_keys; i++)

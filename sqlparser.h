@@ -15,6 +15,9 @@
 parse_result_t parse_row_fields(buffer_t *input, statement_t *statement)
 {
     char *keyword = strtok(input->buffer, " ");
+
+    assert(strcmp(keyword, "insert") == 0 || strcmp(keyword, "update") == 0);
+
     char *id_str = strtok(NULL, " ");
     char *username = strtok(NULL, " ");
     char *email = strtok(NULL, " ");
@@ -29,9 +32,9 @@ parse_result_t parse_row_fields(buffer_t *input, statement_t *statement)
         return PARSE_STRING_TOO_LONG;
     }
 
-    statement->row_to_insert.id = id;
-    strcpy(statement->row_to_insert.username, username);
-    strcpy(statement->row_to_insert.email, email);
+    statement->row_value.id = id;
+    strcpy(statement->row_value.username, username);
+    strcpy(statement->row_value.email, email);
     return PARSE_SUCCESS;
 }
 parse_result_t parse_insert(buffer_t *input, statement_t *statement)
@@ -61,7 +64,7 @@ parse_result_t parse_delete(buffer_t *input, statement_t *statement)
     {
         return PARSE_SYNTAX_ERROR;
     }
-    statement->row_to_insert.id = atoi(id_str);
+    statement->row_value.id = atoi(id_str);
     return PARSE_SUCCESS;
 }
 

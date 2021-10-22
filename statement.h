@@ -14,7 +14,7 @@
 
 execute_result_t execute_insert(statement_t *statement, table_t *table)
 {
-    row_t *row_to_insert = &(statement->row_to_insert);
+    row_t *row_to_insert = &(statement->row_value);
     uint32_t key_to_insert = row_to_insert->id;
     cursor_t *cursor = table_find(table, key_to_insert);
 
@@ -56,12 +56,12 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
 
 execute_result_t execute_update(statement_t *statement, table_t *table)
 {
-    uint32_t key_to_update = statement->row_to_insert.id;
+    uint32_t key_to_update = statement->row_value.id;
     cursor_t *cursor = table_exists(table, key_to_update);
     if (cursor != NULL)
     {
         void *row = cursor_value(cursor);
-        serialize_row(&(statement->row_to_insert), row);
+        serialize_row(&(statement->row_value), row);
         free(cursor);
         return EXECUTE_SUCCESS;
     }
@@ -70,7 +70,7 @@ execute_result_t execute_update(statement_t *statement, table_t *table)
 
 execute_result_t execute_delete(statement_t *statement, table_t *table)
 {
-    uint32_t key_to_delete = statement->row_to_insert.id;
+    uint32_t key_to_delete = statement->row_value.id;
     cursor_t *cursor = table_exists(table, key_to_delete);
     if (cursor != NULL)
     {

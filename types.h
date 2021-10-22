@@ -61,7 +61,7 @@ const uint32_t EMAIL_OFFSET = offset_of_attribute(row_t, email);
 typedef struct
 {
     statement_type_t type;
-    row_t row_to_insert;
+    row_t row_value;
 } statement_t;
 
 typedef enum
