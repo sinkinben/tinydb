@@ -78,7 +78,9 @@ parse_result_t parse_commit(buffer_t *input, statement_t *statement)
 
 parse_result_t parse_rollback(buffer_t *input, statement_t *statement)
 {
-    return PARSE_UNIMPLEMENTED;
+    statement->type = STATEMENT_ROLLBACK;
+    assert(strcmp(strtok(input->buffer, " "), "rollback") == 0);
+    return PARSE_SUCCESS;
 }
 
 // 执行 insert, select 命令

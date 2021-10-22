@@ -6,7 +6,8 @@
 typedef struct
 {
     cursor_t cursor;
-    statement_t statement;
+    statement_type_t statement_type;
+    row_t row_value;
     list_node_t entry;
 } transaction_t;
 typedef transaction_t trans_t;
@@ -17,6 +18,7 @@ trans_t *trans = NULL;
 // this function will run before main
 void __attribute__((constructor)) init_transaction()
 {
+    printf("%u\n", sizeof(trans_t));
     trans = (trans_t *)malloc(sizeof(trans_t));
     init_list_head(&(trans->entry));
 }
@@ -36,16 +38,19 @@ void __attribute__((destructor)) free_transaction()
         free(trans);
 }
 
-void transaction_push(cursor_t *cursor, statement_t *statement)
+void transaction_push(cursor_t *cursor, row_t *row, statement_type_t type)
 {
     trans_t *node = (trans_t *)malloc(sizeof(trans_t));
     memcpy((void *)&(node->cursor), (const void *)cursor, sizeof(cursor_t));
-    memcpy((void *)&(node->statement), (const void *)statement, sizeof(statement_t));
+    memcpy((void *)&(node->row_value), (const void *)row, sizeof(row_t));
+    node->statement_type = type;
     list_add_tail(&(node->entry), &(trans->entry));
 }
 
 trans_t *transaction_pop()
 {
+    if (list_empty(&(trans->entry)))
+        return NULL;
     list_node_t *last = (trans->entry).prev;
     list_del(last);
     return list_entry(last, trans_t, entry);
@@ -76,10 +81,11 @@ void transaction_commit()
 void transaction_rollback()
 {
     trans_t *last = transaction_pop();
+    if (last == NULL)
+        return;
     cursor_t *cursor = &(last->cursor);
-    statement_t *statement = &(last->statement);
-    row_t *row = &(statement->row_value);
-    switch (statement->type)
+    row_t *row = &(last->row_value);
+    switch (last->statement_type)
     {
     case STATEMENT_INSERT:
         leaf_node_fake_delete(cursor, row->id);

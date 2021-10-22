@@ -108,6 +108,8 @@ execute_result_t execute_statement(statement_t *statement, table_t *table)
         return execute_delete(statement, table);
     case STATEMENT_COMMIT:
         return execute_commit(statement, table);
+    case STATEMENT_ROLLBACK:
+        return execute_rollback(statement, table);
     default:
         break;
     }

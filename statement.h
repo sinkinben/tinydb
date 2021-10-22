@@ -35,7 +35,7 @@ execute_result_t execute_insert(statement_t *statement, table_t *table)
 
     leaf_node_insert(cursor, row_to_insert->id, row_to_insert);
 #ifdef OPEN_TRANSACTION
-    transaction_push(cursor, statement);
+    transaction_push(cursor, row_to_insert, statement->type);
 #endif
     free(cursor);
     return EXECUTE_SUCCESS;
@@ -65,10 +65,12 @@ execute_result_t execute_update(statement_t *statement, table_t *table)
     if (cursor != NULL)
     {
         void *row = cursor_value(cursor);
-        serialize_row(&(statement->row_value), row);
 #ifdef OPEN_TRANSACTION
-        transaction_push(cursor, statement);
+        row_t temp;
+        deserialize_row(row, &temp);
+        transaction_push(cursor, &temp, statement->type);
 #endif
+        serialize_row(&(statement->row_value), row);
         free(cursor);
         return EXECUTE_SUCCESS;
     }
@@ -85,7 +87,9 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
         // printf("[execute_delete] cell num: %u\n", cursor->cell_num);
         leaf_node_fake_delete(cursor, key_to_delete);
 #ifdef OPEN_TRANSACTION
-        transaction_push(cursor, statement);
+        row_t temp;
+        deserialize_row(cursor_value(cursor), &temp);
+        transaction_push(cursor, &temp, statement->type);
 #endif
         free(cursor);
         return EXECUTE_SUCCESS;
@@ -104,4 +108,14 @@ execute_result_t execute_commit(statement_t *statement, table_t *table)
     return EXECUTE_SUCCESS;
 }
 
+execute_result_t execute_rollback(statement_t *statement, table_t *table)
+{
+    assert(statement->type == STATEMENT_ROLLBACK);
+#ifdef OPEN_TRANSACTION
+    transaction_rollback();
+#else
+    transaction_fatal();
+#endif
+    return EXECUTE_SUCCESS;
+}
 #endif
