@@ -69,6 +69,8 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 - P8 - 实现完整的 `btree`
   - 分裂 `leaf node` 成为 `interval node` 
   - 实现 `btree` 的递归查找，支持增删改查
+- P9 - 实现 `commit, update`  
+  - 实现单机事务 (transaction) , 也不考虑并发，假设我们的 tinydb 只有一个 client 😅
 
 **Part 8**
 

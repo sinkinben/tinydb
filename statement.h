@@ -66,6 +66,9 @@ execute_result_t execute_update(statement_t *statement, table_t *table)
     {
         void *row = cursor_value(cursor);
         serialize_row(&(statement->row_value), row);
+#ifdef OPEN_TRANSACTION
+        transaction_push(cursor, statement);
+#endif
         free(cursor);
         return EXECUTE_SUCCESS;
     }
@@ -81,6 +84,9 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
         // printf("[execute_delete] page num: %u\n", cursor->page_num);
         // printf("[execute_delete] cell num: %u\n", cursor->cell_num);
         leaf_node_fake_delete(cursor, key_to_delete);
+#ifdef OPEN_TRANSACTION
+        transaction_push(cursor, statement);
+#endif
         free(cursor);
         return EXECUTE_SUCCESS;
     }
