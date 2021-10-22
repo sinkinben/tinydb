@@ -516,7 +516,7 @@ uint32_t *internal_node_child(void *node, uint32_t cell_num)
     uint32_t num_keys = *internal_node_num_keys(node);
     if (cell_num > num_keys)
     {
-        printf("[internal_node_child] Tried to access cell_num %d > num_keys %d\n", cell_num, num_keys);
+        printf("[internal_node_child] Tried to access cell_num %u > num_keys %u\n", cell_num, num_keys);
         exit(EXIT_FAILURE);
     }
     else if (cell_num == num_keys)
