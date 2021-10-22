@@ -106,6 +106,8 @@ execute_result_t execute_statement(statement_t *statement, table_t *table)
         return execute_update(statement, table);
     case STATEMENT_DELETE:
         return execute_delete(statement, table);
+    case STATEMENT_COMMIT:
+        return execute_commit(statement, table);
     default:
         break;
     }

@@ -83,4 +83,12 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
     return EXECUTE_NO_SUCH_KEY;
 }
 
+execute_result_t execute_commit(statement_t *statement, table_t *table)
+{
+    // assert(statement->type == STATEMENT_COMMIT);
+    // transaction_commit();
+    // return EXECUTE_SUCCESS;
+    assert(0);
+}
+
 #endif

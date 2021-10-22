@@ -25,7 +25,6 @@ typedef enum
     PARSE_UNRECOGNIZED_STATEMENT
 } parse_result_t;
 
-const char *STATEMENT_KEYWORDS[] = {"insert", "select", "update", "delete", "commit", "rollback"};
 typedef enum
 {
     STATEMENT_INSERT,
@@ -35,7 +34,6 @@ typedef enum
     STATEMENT_COMMIT,
     STATEMENT_ROLLBACK
 } statement_type_t;
-#define statement_keyword(statement_type) STATEMENT_KEYWORDS[(statement_type)]
 
 // table 的一行·
 #define COLUMN_USERNAME_SIZE 32

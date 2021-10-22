@@ -14,10 +14,10 @@
  **/
 parse_result_t parse_row_fields(buffer_t *input, statement_t *statement)
 {
-    char *keyword = strtok(input->buffer, " ");
+    char __attribute__((unused)) *keyword = strtok(input->buffer, " ");
 
-    assert(strcmp(keyword, statement_keyword(STATEMENT_INSERT)) == 0 ||
-           strcmp(keyword, statement_keyword(STATEMENT_UPDATE)) == 0);
+    assert(statement->type == STATEMENT_UPDATE ||
+           statement->type == STATEMENT_INSERT);
 
     char *id_str = strtok(NULL, " ");
     char *username = strtok(NULL, " ");
@@ -71,7 +71,9 @@ parse_result_t parse_delete(buffer_t *input, statement_t *statement)
 
 parse_result_t parse_commit(buffer_t *input, statement_t *statement)
 {
-    return PARSE_UNIMPLEMENTED;
+    statement->type = STATEMENT_COMMIT;
+    assert(strcmp(strtok(input->buffer, " "), "commit") == 0);
+    return PARSE_SUCCESS;
 }
 
 parse_result_t parse_rollback(buffer_t *input, statement_t *statement)
@@ -82,27 +84,27 @@ parse_result_t parse_rollback(buffer_t *input, statement_t *statement)
 // 执行 insert, select 命令
 parse_result_t parse_statement(buffer_t *input, statement_t *statement)
 {
-    if (strncmp(input->buffer, statement_keyword(STATEMENT_INSERT), 6) == 0)
+    if (strncmp(input->buffer, "insert", 6) == 0)
     {
         return parse_insert(input, statement);
     }
-    if (strncmp(input->buffer, statement_keyword(STATEMENT_SELECT), 6) == 0)
+    if (strncmp(input->buffer, "select", 6) == 0)
     {
         return parse_select(input, statement);
     }
-    if (strncmp(input->buffer, statement_keyword(STATEMENT_UPDATE), 6) == 0)
+    if (strncmp(input->buffer, "update", 6) == 0)
     {
         return parse_update(input, statement);
     }
-    if (strncmp(input->buffer, statement_keyword(STATEMENT_DELETE), 6) == 0)
+    if (strncmp(input->buffer, "delete", 6) == 0)
     {
         return parse_delete(input, statement);
     }
-    if (strncmp(input->buffer, statement_keyword(STATEMENT_COMMIT), 6) == 0)
+    if (strncmp(input->buffer, "commit", 6) == 0)
     {
         return parse_commit(input, statement);
     }
-    if (strncmp(input->buffer, statement_keyword(STATEMENT_COMMIT), 8) == 0)
+    if (strncmp(input->buffer, "rollback", 8) == 0)
     {
         return parse_rollback(input, statement);
     }
