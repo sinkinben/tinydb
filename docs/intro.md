@@ -110,4 +110,6 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 - 目前的 transaction 是一个全局单一的 transaction，即单机、单个 client 的事务。如果需要支持多个 client 的并发事务：
   - 一个想法是：在 insert/update/delete 操作层面加锁，保证内存缓存的一致性（自然磁盘上的数据也具有一致性），但这样并发就是个壳。
   - 或者：使用 2PL 协议。
-  - 或者：每个 client 都有一份独立的缓存，直接在自己的缓存上读写，但这样需要自己实现一个 Consistency Model ，脑洞有点大，并且不好证明其正确性。
+  - 或者：每个 client 都有一份独立的缓存，直接在自己的缓存上读写，当 client 执行 commit 的时候，才正式把修改的内容提交到 tinydb 的主节点（或者是直接提交落盘）。
+    - 这就相当于是一个分布式架构的数据库了。
+    - 但这样需要自己实现一个 Consistency Model ，脑洞有点大，并且不好证明其正确性（当然，实现难度有点大 😅 ，Consistency Model 我就没搞明白几个）。
