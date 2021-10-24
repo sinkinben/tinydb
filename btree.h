@@ -13,12 +13,14 @@ typedef enum
 
 /**
  * a leaf node <==> a page on disk
- * 每个 page 的开头需要存储一些 meta 信息
- * - node_type
- * - is_root
- * - parent_pointer
- * - num_cells: how many rows(cells) in our table
- * - cells: {key1, value1}, {key2, value2}, where key is actually "id" here
+ * at the begining of a page, we need to store some meta-data,
+ * behind these meta-data, are the real <key, value> pairs data
+ * The structure of a leaf node:
+ *   - node_type
+ *   - is_root
+ *   - parent_pointer
+ *   - num_cells: how many rows(cells) in this page
+ *   - cells: {key1, value1}, {key2, value2}, where key is actually "id" here
  **/
 
 // Common Node Header Layout

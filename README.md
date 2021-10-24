@@ -118,7 +118,8 @@ And it also support some meta commands (for debugging):
 
 ## Test
 
-```text
+```bash
+$ mv gemfile Gemfile  # rename Gemfile
 $ bundle install
 $ bundle exec rspec
 ```
