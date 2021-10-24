@@ -69,7 +69,7 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 - P8 - 实现完整的 `btree`
   - 分裂 `leaf node` 成为 `interval node` 
   - 实现 `btree` 的递归查找，支持增删改查
-- P9 - 实现 `commit, update`  
+- P9 - 实现 `commit, rollback`  
   - 实现单机事务 (transaction) , 也不考虑并发，假设我们的 tinydb 只有一个 client 😅
 
 **Part 8**
@@ -94,11 +94,20 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 
 **TODO**
 
-- 实现 Linux Kernel 的侵入式容器（实现一个链表）。
-  - 基于这个链表，实现一个操作 log 链表，然后支持 commit/rollback 等操作。
-- 支持 `commit` ：把内存中修改过的内容持久化到磁盘（目前是 `.exit` 的时候覆盖写入）
+- ✅ 实现 Linux Kernel 的侵入式容器（实现一个链表）。
+  - 基于这个链表，实现一个 transaction log 链表，然后支持 commit/rollback 等操作。
+  - 即实现 WAL (Write Ahead Log) 。
+- ✅ 支持 `commit` ：把内存中修改过的内容持久化到磁盘（目前是 `.exit` 的时候覆盖写入）
+- ✅ 支持 `rollback`
 - ✅ 支持 `delete` ：删除某个 `key` .
   - 目前的 `delete` 是伪删除。
-  - 目前只是简单从 leaf node 中删除，不会调整 parent 指针，也不会重新调整 B+Tree 的结构。
-  - 这意味着，即使某一行从表中删除，但它依旧会占用磁盘空间。
-- 支持 `rollback`
+  - 目前只是简单从 leaf node 中删除，如果某一页被删空，不会调整 parent 指针，也不会重新调整 B+Tree 的结构。
+  - 这意味着，即使某一行从表中删除，但它依旧会占用磁盘空间，但可以重新插入相同的 key。
+- 实现页面回收算法
+  - 假如某一页被删空了，这一页应该被回收，后续在 `get_unused_page_num` 可以重新分配。
+- 假设内存不足，只能缓存 `n` 页，可以实现一个 LFU 算法。
+  - 目前最多允许缓存 `TABLE_MAX_PAGES` 页，如果超过这个数量，会触发 assert 错误。
+- 目前的 transaction 是一个全局单一的 transaction，即单机、单个 client 的事务。如果需要支持多个 client 的并发事务：
+  - 一个想法是：在 insert/update/delete 操作层面加锁，保证内存缓存的一致性（自然磁盘上的数据也具有一致性），但这样并发就是个壳。
+  - 或者：使用 2PL 协议。
+  - 或者：每个 client 都有一份独立的缓存，直接在自己的缓存上读写，但这样需要自己实现一个 Consistency Model ，脑洞有点大，并且不好证明其正确性。
