@@ -35,7 +35,7 @@ typedef enum
     STATEMENT_ROLLBACK
 } statement_type_t;
 
-// table 的一行·
+// table 的一行
 #define COLUMN_USERNAME_SIZE 32
 #define COLUMN_EMAIL_SIZE 255
 typedef struct
@@ -87,7 +87,6 @@ typedef struct
     void *pages[TABLE_MAX_PAGES]; // 每个 pages[i] 映射到 disk 上的一个 page
 } pager_t;
 
-// 暂且不用 B+ 树, 使用数组的形式作为存储结构
 typedef struct
 {
     uint32_t root_page_num;

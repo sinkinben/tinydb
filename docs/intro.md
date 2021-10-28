@@ -103,6 +103,14 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
   - 目前的 `delete` 是伪删除。
   - 目前只是简单从 leaf node 中删除，如果某一页被删空，不会调整 parent 指针，也不会重新调整 B+Tree 的结构。
   - 这意味着，即使某一行从表中删除，但它依旧会占用磁盘空间，但可以重新插入相同的 key。
+- 支持多表，即手动创建一个表
+  - 可以一个文件存放一个表（join 等操作之后再说）。
+- 支持 where 条件
+  -  可以考虑[使用 YACC 实现一个简易的 SQL Compiler](https://blog.csdn.net/towerjt/article/details/2255043)
+  -  `where a <= key <= b` 这很简单
+  - 进阶：多表的情况下，每个表都有不同的 column name；多个表达式 and / or 结合。
+- 支持其他索引键
+  - 先实现类似 InnoDB 聚簇索引，即：索引 B+Tree 中的叶子存放的是 `<index key, primary key>` ，找到 Primary Key 之后，二次查找。
 - 实现页面回收算法
   - 假如某一页被删空了，这一页应该被回收，后续在 `get_unused_page_num` 可以重新分配。
 - 假设内存不足，只能缓存 `n` 页，可以实现一个 LFU 算法。
