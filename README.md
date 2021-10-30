@@ -130,4 +130,5 @@ $ bundle exec rspec
 
 - [1] [SQLite Database System: Design and Implementation](https://play.google.com/store/books/details/SQLite_Database_System_Design_and_Implementation_F?id=9Z6IQQnX1JEC&gl=US)
 - [2] [Architecture of SQLite](https://www.sqlite.org/arch.html)
+- [3] https://github.com/cstack/db_tutorial
 

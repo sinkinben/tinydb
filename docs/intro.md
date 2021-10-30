@@ -106,7 +106,7 @@ The input to the front-end is a SQL query. the output is sqlite virtual machine 
 - 支持多表，即手动创建一个表
   - 可以一个文件存放一个表（join 等操作之后再说）。
 - 支持 where 条件
-  -  可以考虑[使用 YACC 实现一个简易的 SQL Compiler](https://blog.csdn.net/towerjt/article/details/2255043)
+  -  考虑使用 Flex and Bison 实现一个 SQL Parser，参考 `sql-parser.md` 。
   -  `where a <= key <= b` 这很简单
   - 进阶：多表的情况下，每个表都有不同的 column name；多个表达式 and / or 结合。
 - 支持其他索引键

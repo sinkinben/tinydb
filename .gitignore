@@ -7,3 +7,6 @@ test.c
 test.rb
 tinydb
 mydb.db
+lex.yy.c
+*.tab.h
+*.tab.c
