@@ -1,6 +1,6 @@
 ## tinydb
 
-![Code Grade](https://www.code-inspector.com/project/29486/status/svg) ![Code Quality Score](https://www.code-inspector.com/project/29486/score/svg) 
+![Code Grade](https://api.codiga.io/project/29486/status/svg) ![Code Quality Score](https://api.codiga.io/project/29486/score/svg) 
 
 A tiny and dummy database built by myself.
 
