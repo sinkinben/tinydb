@@ -10,3 +10,4 @@ mydb.db
 lex.yy.c
 *.tab.h
 *.tab.c
+vendor

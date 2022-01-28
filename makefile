@@ -1,4 +1,4 @@
-CC=clang -Wall
+CC=clang -Wall -Wno-pointer-to-int-cast
 build:
 	$(CC) main.c -o tinydb
 clean:
