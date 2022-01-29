@@ -18,7 +18,6 @@ int yywrap() { return 1; }
 
 void yyerror(const char *msg) { fprintf(stderr, "error: %s\n", msg); }
 
-int main(int argc, char *argv[]) { yyparse(); }
 
 %}
 
@@ -44,7 +43,6 @@ int main(int argc, char *argv[]) { yyparse(); }
 // token's value
 %token<strval> STRING IDNAME INT CHAR
 %token<intval> NUMBER
-%token<intval> AND OR
 
 // BNF's value
 %type <schema_node> createitem
@@ -144,13 +142,13 @@ cmp_op:
 conditionitem:
     columnitem cmp_op NUMBER
     {
-        $$ = alloc_condition(&($1->schema), $2, $3, true);
+        $$ = alloc_condition((uint64_t)(&($1->schema)), $2, $3, true);
         printf("[conditionitem NUMBER]");
         print_tree($$, 0);
     }
 |   columnitem cmp_op STRING
     {
-        $$ = alloc_condition(&($1->schema), $2, $3, true);
+        $$ = alloc_condition((uint64_t)(&($1->schema)), $2, (uint64_t)($3), true);
         printf("[conditionitem STRING]");
         print_tree($$, 0);
     }
@@ -174,7 +172,7 @@ conditions:
         printf("[logic %d] right: ", $2);
         print_tree($3, 0);
 
-        $$ = alloc_condition($1, $2, $3, false);
+        $$ = alloc_condition((uint64_t)($1), $2, (uint64_t)($3), false);
     }
 ;
 
