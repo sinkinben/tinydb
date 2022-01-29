@@ -53,7 +53,7 @@
 [A-Za-z][A-Za-z0-9_]*	            { yylval.strval = strdup(yytext); return IDNAME; }
 [0-9]+                              { yylval.intval = atoi(yytext);   return NUMBER; }
 
-\n      { return *yytext; }
+\n      { return EOL; }
 [ \t]+  { /* ignore and do nothing */ }
 
 

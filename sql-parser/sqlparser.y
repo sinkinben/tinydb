@@ -5,12 +5,20 @@
 #include <assert.h>
 #include "schema.h"
 #include "condition.h"
-int yyparse();
-int yylex();
+
+extern int yyparse();
+extern int yylex();
 void yyerror(const char *);
+
 schema_node_t *schema_list;   // create table tbl (`schema_list`)
 schema_node_t *select_list;   // select `select_list` from tbl
 condition_t *condition_tree;  // select `select_list` from tbl where `condition_tree`
+
+int yywrap() { return 1; }
+
+void yyerror(const char *msg) { fprintf(stderr, "error: %s\n", msg); }
+
+int main(int argc, char *argv[]) { yyparse(); }
 
 %}
 
@@ -31,6 +39,7 @@ condition_t *condition_tree;  // select `select_list` from tbl where `condition_
 %token GREAT GREAT_EQUAL LESS LESS_EQUAL
 %token EQUAL NOT_EQUAL
 %token AND OR
+%token EOL
 
 // token's value
 %token<strval> STRING IDNAME INT CHAR
@@ -49,20 +58,24 @@ condition_t *condition_tree;  // select `select_list` from tbl where `condition_
 
 %%
 
-statements: statements statement  {}
-| statement {}
+statements:
+    statements statement  {}
+|   statement {}
 ;
 
-statement: selectsql | createsql | '\n'
+statement:
+    EOL {}
+|   selectsql EOL {}
+|   createsql EOL {}
 ;
 
 selectsql:
-    SELECT '*' FROM IDNAME ';' '\n'
+    SELECT '*' FROM IDNAME ';'
     {
         printf("TODO: please select * from [%s] \n", $4);
         printf("IDNAME = %p\n", $4);
     }
-|   SELECT selectitemlist FROM IDNAME ';' '\n'
+|   SELECT selectitemlist FROM IDNAME ';'
     {
         printf("TODO: please select ");
         list_node_t *pos;
@@ -74,14 +87,14 @@ selectsql:
         printf("from %s \n", $4);
         init_list_head(&(select_list->entry));
     }
-|   SELECT '*' FROM IDNAME WHERE conditions ';' '\n'
+|   SELECT '*' FROM IDNAME WHERE conditions ';'
     {
         printf("[SELECT] cond ptr = %p, table name = %s \n", $6, $4);
         print_tree($6, 0);
         init_list_head(&(select_list->entry));
         condition_tree = NULL;
     }
-|   SELECT selectitemlist FROM IDNAME WHERE conditions ';' '\n'
+|   SELECT selectitemlist FROM IDNAME WHERE conditions ';'
     {
         printf("---> TODO: please select ");
         list_node_t *pos;
@@ -166,7 +179,7 @@ conditions:
 ;
 
 createsql:
-    CREATE TABLE IDNAME '(' createitemlist ')' ';' '\n'
+    CREATE TABLE IDNAME '(' createitemlist ')' ';'
     {
         /* TODO: When after creating table, we should free the `createitemlist` */
         printf("table name = %s\n", $3);
@@ -209,11 +222,6 @@ createitemlist:
 
 
 %%
-void yyerror(const char *msg)
-{
-    fprintf(stderr, "error: %s\n", msg);
-}
-
 void __attribute__((constructor)) init()
 {
     /* used by create sql, e.g. create table tbl (`schema_list`),
@@ -231,9 +239,4 @@ void __attribute__((constructor)) init()
      * here we set it NULL, since we don't need a dummy root.
      */
     condition_tree = NULL;
-}
-
-int main(int argc, char *argv[])
-{
-    yyparse();
 }
