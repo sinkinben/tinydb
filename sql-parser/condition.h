@@ -1,4 +1,5 @@
-#include "sql.h"
+#include <assert.h>
+#include "schema.h"
 #ifndef __CONDITION_H__
 #define __CONDITION_H__
 typedef enum
@@ -14,7 +15,7 @@ typedef enum
 } operator_t;
 
 /**
- * A condition_t denote: `lvalue op rvalue`,
+ * A condition_t struct denotes: `lvalue op rvalue`,
  * 1) `lvalue` is always the column name.
  * 2) `rvalue` could be a integer or a string.
  * 3) When is_leaf = 1, then we should use lvalue/rvalue.
@@ -67,6 +68,12 @@ static void print_tree(condition_t *node, int depth)
         print_tree(node->lchild, depth + 1);
         print_tree(node->rchild, depth + 1);
     }
+}
+
+static void destroy_tree(condition_t *node)
+{
+    printf("TODO: PLEASE implement me. \n");
+    assert(0);
 }
 
 

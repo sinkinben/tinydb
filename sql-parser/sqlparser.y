@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include "sql.h"
+#include "schema.h"
 #include "condition.h"
 int yyparse();
 int yylex();
@@ -18,7 +18,7 @@ condition_t *condition_tree;  // select `select_list` from tbl where `condition_
 {
     int32_t intval;
     uint32_t uintval;
-    char *strval;
+    const char *strval;
     struct schema_node_t *schema_node;
     struct schema_node_t *select_node;
     struct condition_t   *condition_tree;
@@ -53,13 +53,14 @@ statements: statements statement  {}
 | statement {}
 ;
 
-statement: selectsql | createsql
+statement: selectsql | createsql | '\n'
 ;
 
 selectsql:
     SELECT '*' FROM IDNAME ';' '\n'
     {
-        printf("TODO: please select * from %s \n", $4);
+        printf("TODO: please select * from [%s] \n", $4);
+        printf("IDNAME = %p\n", $4);
     }
 |   SELECT selectitemlist FROM IDNAME ';' '\n'
     {
@@ -71,11 +72,14 @@ selectsql:
             printf("%s ", fieldname);
         }
         printf("from %s \n", $4);
+        init_list_head(&(select_list->entry));
     }
 |   SELECT '*' FROM IDNAME WHERE conditions ';' '\n'
     {
         printf("[SELECT] cond ptr = %p, table name = %s \n", $6, $4);
         print_tree($6, 0);
+        init_list_head(&(select_list->entry));
+        condition_tree = NULL;
     }
 |   SELECT selectitemlist FROM IDNAME WHERE conditions ';' '\n'
     {
@@ -89,14 +93,15 @@ selectsql:
         printf("from %s \n", $4);
         printf("---> where condition is \n");
         print_tree($6, 0);
+        init_list_head(&(select_list->entry));
+        condition_tree = NULL;
     }
 ;
 
 columnitem:
     IDNAME
     {
-        $$ = (schema_node_t *)malloc(sizeof(schema_node_t));
-        strcpy($$->schema.fieldname, $1);
+        $$ = alloc_schema_node($1, 0, -1);
     }
 ;
 
@@ -148,7 +153,6 @@ conditions:
 |   '(' conditions ')'
     {
         $$ = $2;
-        printf("[conditions]");
     }
 |   conditions logic_op conditions
     {
@@ -164,7 +168,7 @@ conditions:
 createsql:
     CREATE TABLE IDNAME '(' createitemlist ')' ';' '\n'
     {
-        // create table mytable (id int(16), msg1 varchar(32), msg2 varchar(64))
+        /* TODO: When after creating table, we should free the `createitemlist` */
         printf("table name = %s\n", $3);
         list_node_t *pos;
         list_for_each(pos, &(schema_list->entry))
@@ -182,19 +186,11 @@ createsql:
 createitem:
     IDNAME INT '(' NUMBER ')'
     {
-        $$ = (schema_node_t *)malloc(sizeof(schema_node_t));
-        schema_t *schema = &($$->schema);
-        schema->width = $4;
-        schema->column_type = COLUMN_INT;
-        strcpy(schema->fieldname, $1);
+        $$ = alloc_schema_node($1, $4, COLUMN_INT);
     }
 |   IDNAME CHAR '(' NUMBER ')'
     {
-        $$ = (schema_node_t *)malloc(sizeof(schema_node_t));
-        schema_t *schema = &($$->schema);
-        schema->width = $4;
-        schema->column_type = COLUMN_VARCHAR;
-        strcpy(schema->fieldname, $1);
+        $$ = alloc_schema_node($1, $4, COLUMN_VARCHAR);
     }
 
 ;
@@ -206,8 +202,6 @@ createitemlist:
     }
 |   createitemlist ',' createitem
     {
-        // createitem($3) is the new item that lexer scanned
-        // printf("%s %s\n", $1->schema.fieldname, $3->schema.fieldname);
         list_add_tail(&($3->entry), &(schema_list->entry));
     }
 ;
@@ -222,13 +216,15 @@ void yyerror(const char *msg)
 
 void __attribute__((constructor)) init()
 {
-    /* used by create sql, e.g. create table tbl (`schema_list`) */
-    schema_list = (schema_node_t *)malloc(sizeof(schema_node_t));
-    init_list_head(&(schema_list->entry));
+    /* used by create sql, e.g. create table tbl (`schema_list`),
+     * schema_list is a dummy list head node.
+     */
+    schema_list = alloc_schema_node("", 0, DUMMY);
 
-    /* used by select sql, e.g. select `select_list` from tbl */
-    select_list = (schema_node_t *)malloc(sizeof(schema_node_t));
-    init_list_head(&(select_list->entry));
+    /* used by select sql, e.g. select `select_list` from tbl,
+     * select_list is a dummy list head node.
+     */
+    select_list = alloc_schema_node("", 0, DUMMY);
 
     /* used by where condition, e.g.
      * select `select_list` from tbl where `condition_tree`,
