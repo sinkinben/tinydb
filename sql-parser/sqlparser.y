@@ -63,8 +63,8 @@ statements:
 
 statement:
     EOL {}
-|   selectsql EOL {}
-|   createsql EOL {}
+|   selectsql {}
+|   createsql {}
 ;
 
 selectsql:
