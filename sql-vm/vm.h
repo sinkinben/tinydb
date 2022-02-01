@@ -59,6 +59,24 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
     return EXECUTE_SUCCESS;
 }
 
+execute_result_t execute_select_fields(statement_t *statement, table_t *table)
+{
+    cursor_t *cursor = table_start(table);
+    row_t row;
+    uint32_t cnt = 0;
+    uint8_t flags = get_field_flags(statement->schemas);
+    while (!(cursor->end_of_table))
+    {
+        deserialize_row(cursor_value(cursor), &row);
+        cnt++;
+        print_fields(&row, flags);
+        cursor_advance(cursor);
+    }
+    printf("total %u rows\n", cnt);
+    free(cursor);
+    return EXECUTE_SUCCESS;
+}
+
 execute_result_t execute_update(statement_t *statement, table_t *table)
 {
     uint32_t key_to_update = statement->row_value.id;
@@ -120,7 +138,7 @@ execute_result_t execute_rollback(statement_t *statement, table_t *table)
     return EXECUTE_SUCCESS;
 }
 
-execute_result_t execute_vm(statement_t *statement, table_t *table)
+execute_result_t vm_executor(statement_t *statement, table_t *table)
 {
     switch (statement->type)
     {
@@ -128,6 +146,8 @@ execute_result_t execute_vm(statement_t *statement, table_t *table)
         return execute_insert(statement, table);
     case STATEMENT_SELECT:
         return execute_select(statement, table);
+    case STATEMENT_SELECT_FIELDS:
+        return execute_select_fields(statement, table);
     case STATEMENT_UPDATE:
         return execute_update(statement, table);
     case STATEMENT_DELETE:
@@ -140,6 +160,29 @@ execute_result_t execute_vm(statement_t *statement, table_t *table)
         break;
     }
     return EXECUTE_UNKNOWN_STATEMENT;
+}
+
+
+void vm_logger(execute_result_t result, statement_t *statement, buffer_t *input)
+{
+    switch (result)
+    {
+    case EXECUTE_SUCCESS:
+        printf("Executed.\n");
+        break;
+    case EXECUTE_DUPLICATE_KEY:
+        printf("Execute Error: Duplicate key.\n");
+        break;
+    case EXECUTE_NO_SUCH_KEY:
+        printf("Execute Error: No such key %u\n", statement->row_value.id);
+        break;
+    case EXECUTE_TABLE_FULL:
+        printf("Execute Error: Table full.\n");
+        break;
+    case EXECUTE_UNKNOWN_STATEMENT:
+        printf("Execute Error: Unknown sql statement '%s' \n", input->buffer);
+        break;
+    }
 }
 
 #endif

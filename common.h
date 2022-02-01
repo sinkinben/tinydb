@@ -93,10 +93,4 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
     }
 }
 
-// 真正调用底层 API 执行 SQL, 相当于 sqlite 的 Core
-execute_result_t execute_statement(statement_t *statement, table_t *table)
-{
-    return execute_vm(statement, table);
-}
-
 #endif

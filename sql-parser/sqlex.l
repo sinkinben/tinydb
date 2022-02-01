@@ -16,7 +16,6 @@
 "where" |
 "WHERE" { return WHERE; }
 
-"table" |
 "TABLE" { return TABLE; }
 
 "int" |

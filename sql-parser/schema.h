@@ -43,5 +43,18 @@ static inline schema_node_t *alloc_schema_node(const char *filedname, uint32_t w
     return node;
 }
 
+static inline void free_schema_list(schema_node_t *schemas)
+{
+    if (list_empty(&(schemas->entry)))
+        return;
+    list_node_t *pos, *next;
+    list_for_each_safe(pos, next, &schemas->entry)
+    {
+        list_del(pos);
+        free(list_entry(pos, schema_node_t, entry));
+    }
+    init_list_head(&(schemas->entry));
+}
+
 
 #endif

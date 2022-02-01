@@ -75,6 +75,7 @@ typedef struct
 {
     uint32_t root_page_num;
     pager_t *pager;
+    const char *table_name;
 } table_t;
 
 typedef struct

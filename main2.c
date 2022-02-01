@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     char *filename = argv[1];
     table_t *table = db_open(filename);
     statement_t *stm = (statement_t *)malloc(sizeof(statement_t));
+    execute_result_t result;
 
     while (1)
     {
@@ -37,9 +38,8 @@ int main(int argc, char *argv[])
         /* Parse the SQL, and put the result in statement_t `stm` */
         statement_init(stm);
         sql_parser(input->buffer, stm);
-        execute_vm(stm, table);
-
-        // printf("stm->type = %d \n", stm->type);
-        // printf("row = (%u, %s, %s) \n", stm->row_value.id, stm->row_value.username, stm->row_value.email);
+        result = vm_executor(stm, table);
+        vm_logger(result, stm, input);
+        statement_free(stm);
     }
 }

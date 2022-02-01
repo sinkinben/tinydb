@@ -7,6 +7,7 @@ typedef enum
 {
     STATEMENT_INSERT,
     STATEMENT_SELECT,
+    STATEMENT_SELECT_FIELDS,
     STATEMENT_UPDATE,
     STATEMENT_DELETE,
     STATEMENT_COMMIT,
@@ -23,19 +24,46 @@ typedef struct
     condition_t *conditions; /* WHERE conditions             */
 } statement_t;
 
-static inline void statement_init(statement_t *stm)
+static inline void statement_set(
+    statement_t *stm,
+    statement_type_t type,
+    const char *table_name,
+    schema_node_t *schemas,
+    condition_t *conds
+)
 {
-    stm->type = -1;
-    stm->table_name = NULL;
-    stm->schemas = NULL;
-    stm->conditions = NULL;
+    stm->type = type;
+    stm->table_name = table_name;
+    stm->schemas = schemas;
+    stm->conditions = conds;
     memset(&(stm->row_value), 0, sizeof(row_t));
 }
 
+static inline void statement_init(statement_t *stm)
+{
+    statement_set(stm, -1, NULL, NULL, NULL);
+}
+
+/* Free the resource that were allocated in sql parser,
+ * and keep the `stm` struct.
+ */
 static inline void statement_free(statement_t *stm)
 {
-    // TODO
-    assert(0);
+    if (stm->schemas)
+    {
+        free_schema_list(stm->schemas);
+        stm->schemas = NULL;
+    }
+    if (stm->table_name)
+    {
+        free((void *)(stm->table_name));
+        stm->table_name = NULL;
+    }
+    if (stm->conditions)
+    {
+        destroy_condition_tree(stm->conditions);
+        stm->conditions = NULL;
+    }
 }
 
 #endif

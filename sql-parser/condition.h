@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "schema.h"
+#include "types.h"
 #ifndef __CONDITION_H__
 #define __CONDITION_H__
 typedef enum
@@ -70,10 +71,15 @@ static inline void print_tree(condition_t *node, int depth)
     }
 }
 
-static inline void destroy_tree(condition_t *node)
+static bool test_condition(condition_t *cond, row_t *row)
 {
-    printf("TODO: PLEASE implement me. \n");
-    assert(0);
+    return true;
+}
+
+static inline void destroy_condition_tree(condition_t *node)
+{
+    printf("[destroy_condition_tree]: PLEASE implement me. \n");
+    // assert(0);
 }
 
 

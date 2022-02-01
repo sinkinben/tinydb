@@ -77,44 +77,19 @@ statement:
 selectsql:
     SELECT '*' FROM IDNAME ';'
     {
-        printf("TODO: please select * from [%s] \n", $4);
-        printf("IDNAME = %p\n", $4);
-        stm_ptr->table_name = $4;
-        stm_ptr->type = STATEMENT_SELECT;
+        statement_set(stm_ptr, STATEMENT_SELECT, $4, select_list, NULL);
     }
 |   SELECT selectitemlist FROM IDNAME ';'
     {
-        printf("TODO: please select ");
-        list_node_t *pos;
-        list_for_each(pos, &(select_list->entry))
-        {
-            const char *fieldname = list_entry(pos, schema_node_t, entry)->schema.fieldname;
-            printf("%s ", fieldname);
-        }
-        printf("from %s \n", $4);
-        init_list_head(&(select_list->entry));
+        statement_set(stm_ptr, STATEMENT_SELECT_FIELDS, $4, select_list, NULL);
     }
 |   SELECT '*' FROM IDNAME WHERE conditions ';'
     {
-        printf("[SELECT] cond ptr = %p, table name = %s \n", $6, $4);
-        print_tree($6, 0);
-        init_list_head(&(select_list->entry));
-        condition_tree = NULL;
+        statement_set(stm_ptr, STATEMENT_SELECT, $4, select_list, $6);
     }
 |   SELECT selectitemlist FROM IDNAME WHERE conditions ';'
     {
-        printf("---> TODO: please select ");
-        list_node_t *pos;
-        list_for_each(pos, &(select_list->entry))
-        {
-            const char *fieldname = list_entry(pos, schema_node_t, entry)->schema.fieldname;
-            printf("%s ", fieldname);
-        }
-        printf("from %s \n", $4);
-        printf("---> where condition is \n");
-        print_tree($6, 0);
-        init_list_head(&(select_list->entry));
-        condition_tree = NULL;
+        statement_set(stm_ptr, STATEMENT_SELECT_FIELDS, $4, select_list, $6);
     }
 ;
 

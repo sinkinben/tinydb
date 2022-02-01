@@ -5,6 +5,7 @@
 #include "types.h"
 #include "pager.h"
 #include "btree.h"
+#include "sql-parser/schema.h"
 #ifndef TABLE_H
 #define TABLE_H
 
@@ -27,6 +28,41 @@ void print_row(row_t *row)
     printf("(%u, %s, %s)\n", row->id, row->username, row->email);
 }
 
+uint8_t get_field_flags(schema_node_t *schemas)
+{
+    if (schemas == NULL)
+        return 7;
+
+    uint8_t flags = 0;
+    list_node_t *pos;
+    list_for_each(pos, &(schemas->entry))
+    {
+        const char *field = list_entry(pos, schema_node_t, entry)->schema.fieldname;
+        if (strcmp(field, "id") == 0)
+            flags |= 1;
+        else if (strcmp(field, "username") == 0)
+            flags |= 2;
+        else if (strcmp(field, "email") == 0)
+            flags |= 4;
+    }
+    if (flags == 0) flags = 7;
+    return flags;
+}
+
+void print_fields(row_t *row, uint8_t flags)
+{
+    if (flags & 1)
+        printf("id = %u ", row->id);
+
+    if (flags & 2)
+        printf("username = %s ", row->username);
+
+    if (flags & 4)
+        printf("email = %s ", row->email);
+
+    printf("\n");
+}
+
 // opening the database file
 // initializing a pager data structure
 // initializing a table data structure
@@ -34,6 +70,7 @@ table_t *db_open(const char *filename)
 {
     pager_t *pager = pager_open(filename);
     table_t *table = (table_t *)malloc(sizeof(table_t));
+    table->table_name = filename;
     table->pager = pager;
     table->root_page_num = 0;
     if (pager->num_pages == 0)

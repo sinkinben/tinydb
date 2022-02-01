@@ -29,7 +29,11 @@ int main(int argc, char *argv[])
             }
         }
 
-        statement_t statement;
+        statement_t statement = {
+            .conditions = NULL,
+            .schemas = NULL,
+            .table_name = filename
+        };
         switch (parse_statement(input_buffer, &statement))
         {
         case PARSE_SUCCESS:
@@ -48,23 +52,7 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        switch (execute_statement(&statement, table))
-        {
-        case EXECUTE_SUCCESS:
-            printf("Executed.\n");
-            break;
-        case EXECUTE_DUPLICATE_KEY:
-            printf("Execute Error: Duplicate key.\n");
-            break;
-        case EXECUTE_NO_SUCH_KEY:
-            printf("Execute Error: No such key %u\n", statement.row_value.id);
-            break;
-        case EXECUTE_TABLE_FULL:
-            printf("Execute Error: Table full.\n");
-            break;
-        case EXECUTE_UNKNOWN_STATEMENT:
-            printf("Execute Error: Unknown sql statement '%s' \n", input_buffer->buffer);
-            break;
-        }
+        execute_result_t result = vm_executor(&statement, table);
+        vm_logger(result, &statement, input_buffer);
     }
 }
