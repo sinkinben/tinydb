@@ -1,6 +1,7 @@
 #ifdef OPEN_TRANSACTION
 #include "list.h"
 #include "types.h"
+#include "sql-statement/statement.h"
 #ifndef TRANSACTION_H
 #define TRANSACTION_H
 typedef struct

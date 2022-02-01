@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "table.h"
 #include "types.h"
-#include "statement.h"
+#include "sql-vm/vm.h"
 #include "debug.h"
 #ifndef COMMON_H
 #define COMMON_H
@@ -96,24 +96,7 @@ meta_command_result_t do_meta_command(buffer_t *input, table_t *table)
 // 真正调用底层 API 执行 SQL, 相当于 sqlite 的 Core
 execute_result_t execute_statement(statement_t *statement, table_t *table)
 {
-    switch (statement->type)
-    {
-    case STATEMENT_INSERT:
-        return execute_insert(statement, table);
-    case STATEMENT_SELECT:
-        return execute_select(statement, table);
-    case STATEMENT_UPDATE:
-        return execute_update(statement, table);
-    case STATEMENT_DELETE:
-        return execute_delete(statement, table);
-    case STATEMENT_COMMIT:
-        return execute_commit(statement, table);
-    case STATEMENT_ROLLBACK:
-        return execute_rollback(statement, table);
-    default:
-        break;
-    }
-    return EXECUTE_UNKNOWN_STATEMENT;
+    return execute_vm(statement, table);
 }
 
 #endif

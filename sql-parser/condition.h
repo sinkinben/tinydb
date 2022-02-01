@@ -42,7 +42,7 @@ struct condition_t
 };
 typedef struct condition_t condition_t;
 
-static condition_t *alloc_condition(uint64_t lchild, operator_t op, uint64_t rchild, bool is_leaf)
+static inline condition_t *alloc_condition(uint64_t lchild, operator_t op, uint64_t rchild, bool is_leaf)
 {
     condition_t *cond = (condition_t *)malloc(sizeof(condition_t));
     cond->op = op;
@@ -52,7 +52,7 @@ static condition_t *alloc_condition(uint64_t lchild, operator_t op, uint64_t rch
     return cond;
 }
 
-static void print_tree(condition_t *node, int depth)
+static inline void print_tree(condition_t *node, int depth)
 {
     if (node == NULL)
         return;
@@ -70,7 +70,7 @@ static void print_tree(condition_t *node, int depth)
     }
 }
 
-static void destroy_tree(condition_t *node)
+static inline void destroy_tree(condition_t *node)
 {
     printf("TODO: PLEASE implement me. \n");
     assert(0);

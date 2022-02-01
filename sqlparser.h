@@ -3,7 +3,7 @@
 #include "types.h"
 #ifndef SQL_PARSER_H
 #define SQL_PARSER_H
-/**
+/** A Dummy SQL Parser By Hand
  * This is equal to `SQL Compiler` module in sqlite.
  * Here, we just compiler(parse) the sql by hands :-D .
  * Parse the sql statements, and put the result in statement_t

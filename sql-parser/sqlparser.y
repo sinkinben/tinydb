@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "schema.h"
 #include "condition.h"
+#include "sql-statement/statement.h"
 
 extern int yyparse();
 extern int yylex();
@@ -16,8 +17,14 @@ condition_t *condition_tree;  // select `select_list` from tbl where `condition_
 
 int yywrap() { return 1; }
 
-void yyerror(const char *msg) { fprintf(stderr, "error: %s\n", msg); }
+void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg); }
 
+#define YYPARSE_PARAM parm
+
+/* `stm_ptr` is a pointer, that points to a statement_t struct,
+ * see `sql_parser()` in sqlparser.h
+ */
+#define stm_ptr ((statement_t *)(parm))
 
 %}
 
@@ -72,6 +79,8 @@ selectsql:
     {
         printf("TODO: please select * from [%s] \n", $4);
         printf("IDNAME = %p\n", $4);
+        stm_ptr->table_name = $4;
+        stm_ptr->type = STATEMENT_SELECT;
     }
 |   SELECT selectitemlist FROM IDNAME ';'
     {

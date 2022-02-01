@@ -1,8 +1,9 @@
 #include "types.h"
 #include "cursor.h"
 #include "transaction.h"
-#ifndef STATEMENT_H
-#define STATEMENT_H
+#include "sql-statement/statement.h"
+#ifndef TINYDB_VM_H
+#define TINYDB_VM_H
 
 /**
  * The parsing result of a SQL statement sentence is stored in statement_t.
@@ -118,4 +119,27 @@ execute_result_t execute_rollback(statement_t *statement, table_t *table)
 #endif
     return EXECUTE_SUCCESS;
 }
+
+execute_result_t execute_vm(statement_t *statement, table_t *table)
+{
+    switch (statement->type)
+    {
+    case STATEMENT_INSERT:
+        return execute_insert(statement, table);
+    case STATEMENT_SELECT:
+        return execute_select(statement, table);
+    case STATEMENT_UPDATE:
+        return execute_update(statement, table);
+    case STATEMENT_DELETE:
+        return execute_delete(statement, table);
+    case STATEMENT_COMMIT:
+        return execute_commit(statement, table);
+    case STATEMENT_ROLLBACK:
+        return execute_rollback(statement, table);
+    default:
+        break;
+    }
+    return EXECUTE_UNKNOWN_STATEMENT;
+}
+
 #endif

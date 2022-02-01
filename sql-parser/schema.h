@@ -1,10 +1,11 @@
-#include "../list.h"
+#include "list.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #ifndef __SCHEMA_H__
 #define __SCHEMA_H__
 
-const uint32_t TBALE_COLUMN_NAME_MAX_LENGTH = 32;
+static const uint32_t TBALE_COLUMN_NAME_MAX_LENGTH = 32;
 typedef enum
 {
     DUMMY = -1,
@@ -32,7 +33,7 @@ struct schema_node_t
 typedef struct schema_node_t schema_node_t;
 
 
-schema_node_t *alloc_schema_node(const char *filedname, uint32_t width, column_type_t column_type)
+static inline schema_node_t *alloc_schema_node(const char *filedname, uint32_t width, column_type_t column_type)
 {
     schema_node_t *node = (schema_node_t *)malloc(sizeof(schema_node_t));
     strcpy(node->schema.fieldname, filedname);

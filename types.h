@@ -25,15 +25,6 @@ typedef enum
     PARSE_UNRECOGNIZED_STATEMENT
 } parse_result_t;
 
-typedef enum
-{
-    STATEMENT_INSERT,
-    STATEMENT_SELECT,
-    STATEMENT_UPDATE,
-    STATEMENT_DELETE,
-    STATEMENT_COMMIT,
-    STATEMENT_ROLLBACK
-} statement_type_t;
 
 // table 的一行
 #define COLUMN_USERNAME_SIZE 32
@@ -46,23 +37,16 @@ typedef struct
 } row_t;
 
 #define size_of_attribute(Struct, Attribute) sizeof(((Struct *)0)->Attribute)
-const uint32_t ID_SIZE = size_of_attribute(row_t, id);
-const uint32_t USERNAME_SIZE = size_of_attribute(row_t, username);
-const uint32_t EMAIL_SIZE = size_of_attribute(row_t, email);
-const uint32_t ROW_SIZE = ID_SIZE + USERNAME_SIZE + EMAIL_SIZE;
+static const uint32_t ID_SIZE = size_of_attribute(row_t, id);
+static const uint32_t USERNAME_SIZE = size_of_attribute(row_t, username);
+static const uint32_t EMAIL_SIZE = size_of_attribute(row_t, email);
+static const uint32_t ROW_SIZE = ID_SIZE + USERNAME_SIZE + EMAIL_SIZE;
 
 #define offset_of_attribute(Struct, Attribute) ((uint32_t)(&((Struct *)0)->Attribute))
-const uint32_t ID_OFFSET = offset_of_attribute(row_t, id);
-const uint32_t USERNAME_OFFSET = offset_of_attribute(row_t, username);
-const uint32_t EMAIL_OFFSET = offset_of_attribute(row_t, email);
+static const uint32_t ID_OFFSET = offset_of_attribute(row_t, id);
+static const uint32_t USERNAME_OFFSET = offset_of_attribute(row_t, username);
+static const uint32_t EMAIL_OFFSET = offset_of_attribute(row_t, email);
 
-// insert, select 等命令的解析结果
-// 相当于一个简易的 sql-parser
-typedef struct
-{
-    statement_type_t type;
-    row_t row_value;
-} statement_t;
 
 typedef enum
 {
@@ -73,9 +57,9 @@ typedef enum
     EXECUTE_TABLE_FULL
 } execute_result_t;
 
-const uint32_t TABLE_MAX_PAGES = 1 << 20;
+static const uint32_t TABLE_MAX_PAGES = 1 << 20;
 
-const uint32_t PAGE_SIZE = 4096; // 4KB
+static const uint32_t PAGE_SIZE = 4096; // 4KB
 // const uint32_t ROWS_PER_PAGE = PAGE_SIZE / ROW_SIZE;
 // const uint32_t TABLE_MAX_ROWS = TABLE_MAX_PAGES * ROWS_PER_PAGE;
 
