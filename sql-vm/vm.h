@@ -6,12 +6,16 @@
 #define TINYDB_VM_H
 
 /**
- * The parsing result of a SQL statement sentence is stored in statement_t.
+ * The parsing result of a SQL statement is stored in statement_t.
  * These `execute_xxx` functions are equal to the "Vitrual Machine" in sqlite.
  * SQL Statement:
- * - insert id username email
- * - select
- * - update id username email
+ * 1) execute_select, execute_delete are used by the dummy sql parser.
+ *    > select (this will print all the rows)
+ *    > delete [id] (this will delete the row whose id is `[id]` from B+Tree)
+ *
+ * 2) select_where, delete_where are used by the sql parser based on flex-bison.
+ *    > select * from table where id > 10 and id < 30;
+ *    > delete * from table where id > 10 and id < 30;
  **/
 
 execute_result_t execute_insert(statement_t *statement, table_t *table)
@@ -59,7 +63,7 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
     return EXECUTE_SUCCESS;
 }
 
-execute_result_t execute_select_fields(statement_t *statement, table_t *table)
+execute_result_t execute_select_where(statement_t *statement, table_t *table)
 {
     cursor_t *cursor = table_start(table);
     row_t row;
@@ -106,8 +110,6 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
     cursor_t *cursor = table_exists(table, key_to_delete);
     if (cursor != NULL)
     {
-        // printf("[execute_delete] page num: %u\n", cursor->page_num);
-        // printf("[execute_delete] cell num: %u\n", cursor->cell_num);
         leaf_node_fake_delete(cursor, key_to_delete);
 #ifdef OPEN_TRANSACTION
         row_t temp;
@@ -118,6 +120,13 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
         return EXECUTE_SUCCESS;
     }
     return EXECUTE_NO_SUCH_KEY;
+}
+
+execute_result_t execute_delete_where(statement_t *statement, table_t *table)
+{
+    /* There is bugs while scanning B+Tree and deleting at the same time. */
+    TODO(__FILE__, __LINE__);
+    return EXECUTE_UNKNOWN_STATEMENT;
 }
 
 execute_result_t execute_commit(statement_t *statement, table_t *table)
@@ -150,12 +159,14 @@ execute_result_t vm_executor(statement_t *statement, table_t *table)
         return execute_insert(statement, table);
     case STATEMENT_SELECT:
         return execute_select(statement, table);
-    case STATEMENT_SELECT_FIELDS:
-        return execute_select_fields(statement, table);
+    case STATEMENT_SELECT_WHERE:
+        return execute_select_where(statement, table);
     case STATEMENT_UPDATE:
         return execute_update(statement, table);
     case STATEMENT_DELETE:
         return execute_delete(statement, table);
+    case STATEMENT_DELETE_WHERE:
+        return execute_delete_where(statement, table);
     case STATEMENT_COMMIT:
         return execute_commit(statement, table);
     case STATEMENT_ROLLBACK:

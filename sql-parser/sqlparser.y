@@ -39,7 +39,8 @@ void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg
 }
 
 // sql keywords
-%token SELECT INSERT FROM TABLE CREATE WHERE VALUES INTO
+%token SELECT INSERT CREATE DELETE
+%token FROM TABLE WHERE VALUES INTO
 %token COMMIT ROLLBACK
 
 // sql operator
@@ -74,8 +75,16 @@ statement:
 |   selectsql {}
 |   createsql {}
 |   insertsql {}
+|   deletesql {}
 |   commitsql {}
 |   rollbacksql {}
+;
+
+deletesql:
+    DELETE FROM IDNAME WHERE conditions ';'
+    {
+        statement_set(stm_ptr, STATEMENT_DELETE_WHERE, $3, select_list, $5);
+    }
 ;
 
 commitsql:
@@ -112,15 +121,15 @@ selectsql:
     }
 |   SELECT selectitemlist FROM IDNAME ';'
     {
-        statement_set(stm_ptr, STATEMENT_SELECT_FIELDS, $4, select_list, NULL);
+        statement_set(stm_ptr, STATEMENT_SELECT_WHERE, $4, select_list, NULL);
     }
 |   SELECT '*' FROM IDNAME WHERE conditions ';'
     {
-        statement_set(stm_ptr, STATEMENT_SELECT_FIELDS, $4, select_list, $6);
+        statement_set(stm_ptr, STATEMENT_SELECT_WHERE, $4, select_list, $6);
     }
 |   SELECT selectitemlist FROM IDNAME WHERE conditions ';'
     {
-        statement_set(stm_ptr, STATEMENT_SELECT_FIELDS, $4, select_list, $6);
+        statement_set(stm_ptr, STATEMENT_SELECT_WHERE, $4, select_list, $6);
     }
 ;
 

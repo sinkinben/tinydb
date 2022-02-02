@@ -421,14 +421,16 @@ cursor_t *leaf_node_find(table_t *table, uint32_t page_num, uint32_t key)
 
 /**
  * Fake deletion of B+Tree
- * Suppose there are `num_cell = 4` cells in `node` (which are [2,5,6,7]), and `key = 2`.
+ * 1) Suppose there are `num_cell = 4` cells in `node` (which are [2,5,6,7]), and `key = 2`.
  * We simply delete the `key` like deletion in a sorted array (move data forward).
- * 
- * After deleting `key = 2`, num_cells = 3 (which are [5,6,7]), and
+ *
+ * 2) After deleting `key = 2`, num_cells = 3 (which are [5,6,7]), and
  * we DO NOT adjust the parent of `node`, and the structure of our B+Tree.
- * 
- * Thus, we call it "fake_delete", since even if the row(cell) is deleted, 
+ *
+ * 3) Thus, we call it "fake_delete", since even if the row(cell) is deleted,
  * it still occupy disk space.
+ *
+ * 4) If the `num_cells` of leaf node is ZERO, then just return and delete nothing.
  **/
 void leaf_node_fake_delete(cursor_t *cursor, uint32_t key_to_delete)
 {

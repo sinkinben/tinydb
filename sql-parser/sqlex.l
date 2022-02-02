@@ -16,6 +16,9 @@
 "rollback" |
 "ROLLBACK" { return ROLLBACK; }
 
+"delete" |
+"DELETE" { return DELETE; }
+
 "create" |
 "CREATE" { return CREATE; }
 
