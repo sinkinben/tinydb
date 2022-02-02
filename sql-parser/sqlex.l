@@ -7,6 +7,15 @@
 "select" |
 "SELECT" { return SELECT; }
 
+"insert" |
+"INSERT" { return INSERT; }
+
+"commit" |
+"COMMIT" { return COMMIT; }
+
+"rollback" |
+"ROLLBACK" { return ROLLBACK; }
+
 "create" |
 "CREATE" { return CREATE; }
 
@@ -15,6 +24,12 @@
 
 "where" |
 "WHERE" { return WHERE; }
+
+"into" |
+"INTO" { return INTO; }
+
+"values" |
+"VALUES" { return VALUES; }
 
 "TABLE" { return TABLE; }
 

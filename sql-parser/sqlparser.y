@@ -39,7 +39,8 @@ void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg
 }
 
 // sql keywords
-%token SELECT FROM TABLE CREATE WHERE
+%token SELECT INSERT FROM TABLE CREATE WHERE VALUES INTO
+%token COMMIT ROLLBACK
 
 // sql operator
 %token GREAT GREAT_EQUAL LESS LESS_EQUAL
@@ -72,6 +73,36 @@ statement:
     EOL {}
 |   selectsql {}
 |   createsql {}
+|   insertsql {}
+|   commitsql {}
+|   rollbacksql {}
+;
+
+commitsql:
+    COMMIT ';'
+    {
+        statement_set(stm_ptr, STATEMENT_COMMIT, NULL, select_list, NULL);
+    }
+;
+
+rollbacksql:
+    ROLLBACK ';'
+    {
+        statement_set(stm_ptr, STATEMENT_ROLLBACK, NULL, select_list, NULL);
+    }
+;
+
+insertsql:
+    INSERT INTO IDNAME VALUES '(' NUMBER ',' STRING ',' STRING ')' ';'
+    {
+        statement_set(stm_ptr, STATEMENT_INSERT, $3, select_list, NULL);
+        row_t *row = &(stm_ptr->row_value);
+        row->id = $6;
+        strcpy(row->username, $8);
+        strcpy(row->email, $10);
+        free((void *)($8));
+        free((void *)($10));
+    }
 ;
 
 selectsql:
