@@ -431,13 +431,17 @@ cursor_t *leaf_node_find(table_t *table, uint32_t page_num, uint32_t key)
  * it still occupy disk space.
  *
  * 4) If the `num_cells` of leaf node is ZERO, then just return and delete nothing.
+ * The returned value denote whether if we deleted a cell from B+Tree.
  **/
-void leaf_node_fake_delete(cursor_t *cursor, uint32_t key_to_delete)
+bool leaf_node_fake_delete(cursor_t *cursor, uint32_t key_to_delete)
 {
     uint32_t cell_num = cursor->cell_num;
     void *node = get_page(cursor->table->pager, cursor->page_num);
 
     uint32_t num_cells = *leaf_node_num_cells(node);
+
+    if (num_cells == 0)
+        return false;
 
     assert(cell_num < num_cells && *leaf_node_key(node, cell_num) == key_to_delete);
 
@@ -446,6 +450,7 @@ void leaf_node_fake_delete(cursor_t *cursor, uint32_t key_to_delete)
         memcpy(leaf_node_cell(node, i), leaf_node_cell(node, i + 1), LEAF_NODE_CELL_SIZE);
     }
     *leaf_node_num_cells(node) = num_cells - 1;
+    return true;
 }
 
 /**

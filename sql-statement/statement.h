@@ -19,11 +19,11 @@ typedef enum
 
 typedef struct
 {
-    statement_type_t type;   /* SELECT, UPDATE, DELETE, etc. */
-    row_t row_value;         /* The row value of INSERT SQL  */
-    const char *table_name;  /* table name                   */
-    schema_node_t *schemas;  /* SELECT column items list     */
-    condition_t *conditions; /* WHERE conditions             */
+    statement_type_t type;   // SELECT, UPDATE, DELETE, etc.
+    row_t row_value;         // The row value of INSERT SQL
+    const char *table_name;  // table name
+    schema_node_t *schemas;  // SELECT/UPDATE column items list
+    condition_t *conditions; // WHERE conditions
 } statement_t;
 
 static inline void statement_set(

@@ -57,9 +57,12 @@ execute_result_t execute_select(statement_t *statement, table_t *table)
     uint32_t i = 0;
     while (!(cursor->end_of_table))
     {
-        deserialize_row(cursor_value(cursor), &row);
-        i++;
-        print_row(&row);
+        if (!cursor_empty(cursor))
+        {
+            deserialize_row(cursor_value(cursor), &row);
+            i++;
+            print_row(&row);
+        }
         cursor_advance(cursor);
     }
     printf("total %u rows\n", i);
@@ -76,8 +79,7 @@ execute_result_t execute_select_where(statement_t *statement, table_t *table)
     while (!(cursor->end_of_table))
     {
         deserialize_row(cursor_value(cursor), &row);
-
-        if (test_condition(statement->conditions, &row))
+        if (!cursor_empty(cursor) && test_condition(statement->conditions, &row))
         {
             cnt++;
             print_fields(&row, flags);
@@ -161,8 +163,24 @@ execute_result_t execute_delete(statement_t *statement, table_t *table)
 execute_result_t execute_delete_where(statement_t *statement, table_t *table)
 {
     /* There is bugs while scanning B+Tree and deleting at the same time. */
-    TODO(__FILE__, __LINE__);
-    return EXECUTE_UNKNOWN_STATEMENT;
+    // TODO(__FILE__, __LINE__);
+    cursor_t *cursor = table_start(table);
+    row_t row;
+    uint32_t cnt = 0;
+    while (!(cursor->end_of_table))
+    {
+        deserialize_row(cursor_value(cursor), &row);
+        if (test_condition(statement->conditions, &row) &&
+            leaf_node_fake_delete(cursor, row.id))
+        {
+            cnt += 1;
+            cursor->cell_num -= 1;
+        }
+        cursor_advance(cursor);
+    }
+    free(cursor);
+    printf("total %u rows were deleted. \n", cnt);
+    return EXECUTE_SUCCESS;
 }
 
 execute_result_t execute_commit(statement_t *statement, table_t *table)
