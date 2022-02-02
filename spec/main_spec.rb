@@ -1,6 +1,6 @@
 describe 'database' do
   before do
-    `make build`
+    `make test`
   end
   def run_script(commands)
     system("if [ -f mydb.db ]; then rm mydb.db; fi")

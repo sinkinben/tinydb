@@ -7,7 +7,7 @@ SQLVM=$(PROJECT)/sql-v,
 INCLUDE=-I$(PROJECT) -I$(SQLPARSER) -I$(SQLVM)
 
 build: sqlparser
-	$(CC) $(INCLUDE) sqlparser.tab.c lex.yy.c main.c -o tinydb
+	$(CC) $(INCLUDE) sqlparser.tab.c lex.yy.c main2.c -o tinydb
 
 clean:
 	rm *.db tinydb lex.yy.c *.tab.c *.tab.h
@@ -21,5 +21,4 @@ sqlparser:
 	bison -d $(SQLPARSER)/sqlparser.y
 
 test:
-	$(CC) test.c -o a.out
-	./a.out
+	$(CC) $(INCLUDE) main.c -o tinydb
