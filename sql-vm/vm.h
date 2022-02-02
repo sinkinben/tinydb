@@ -9,13 +9,17 @@
  * The parsing result of a SQL statement is stored in statement_t.
  * These `execute_xxx` functions are equal to the "Vitrual Machine" in sqlite.
  * SQL Statement:
- * 1) execute_select, execute_delete are used by the dummy sql parser.
+ * 1) execute_select, execute_delete, execute_update are used by the dummy sql
+ * parser.
  *    > select (this will print all the rows)
  *    > delete [id] (this will delete the row whose id is `[id]` from B+Tree)
+ *    > update [id] [username] [email]
  *
- * 2) select_where, delete_where are used by the sql parser based on flex-bison.
+ * 2) select_where, delete_where, update_where are used by the sql parser
+ * based on flex-bison.
  *    > select * from table where id > 10 and id < 30;
  *    > delete * from table where id > 10 and id < 30;
+ *    > update table set username='skb', email='skn@qq.com' where id < 10;
  **/
 
 execute_result_t execute_insert(statement_t *statement, table_t *table)
@@ -104,6 +108,38 @@ execute_result_t execute_update(statement_t *statement, table_t *table)
     return EXECUTE_NO_SUCH_KEY;
 }
 
+/**
+ * @brief Scan all rows in the table to update.
+ */
+execute_result_t execute_update_where(statement_t *statement, table_t *table)
+{
+    cursor_t *cursor = table_start(table);
+    schema_node_t *schemas = statement->schemas;
+    list_node_t *pos;
+    row_t row;
+    while (!(cursor->end_of_table))
+    {
+        deserialize_row(cursor_value(cursor), &row);
+        if (test_condition(statement->conditions, &row))
+        {
+            list_for_each(pos, &(schemas->entry))
+            {
+                schema_t *schema = &(list_entry(pos, schema_node_t, entry)->schema);
+                uint64_t schema_val = list_entry(pos, schema_node_t, entry)->schema_value;
+                if (strcmp("id", schema->fieldname) == 0)
+                    row.id = schema_val;
+                else if (strcmp("username", schema->fieldname) == 0)
+                    strcpy(row.username, (char *)(schema_val));
+                else if (strcmp("email", schema->fieldname) == 0)
+                    strcpy(row.email, (char *)(schema_val));
+            }
+            serialize_row(&row, cursor_value(cursor));
+        }
+        cursor_advance(cursor);
+    }
+    return EXECUTE_SUCCESS;
+}
+
 execute_result_t execute_delete(statement_t *statement, table_t *table)
 {
     uint32_t key_to_delete = statement->row_value.id;
@@ -163,6 +199,8 @@ execute_result_t vm_executor(statement_t *statement, table_t *table)
         return execute_select_where(statement, table);
     case STATEMENT_UPDATE:
         return execute_update(statement, table);
+    case STATEMENT_UPDATE_WHERE:
+        return execute_update_where(statement, table);
     case STATEMENT_DELETE:
         return execute_delete(statement, table);
     case STATEMENT_DELETE_WHERE:

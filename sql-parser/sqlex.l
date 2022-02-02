@@ -19,6 +19,9 @@
 "delete" |
 "DELETE" { return DELETE; }
 
+"update" |
+"UPDATE" { return UPDATE; }
+
 "create" |
 "CREATE" { return CREATE; }
 
@@ -33,6 +36,9 @@
 
 "values" |
 "VALUES" { return VALUES; }
+
+"set" |
+"SET" { return SET; }
 
 "TABLE" { return TABLE; }
 

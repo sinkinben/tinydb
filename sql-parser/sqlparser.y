@@ -13,6 +13,7 @@ void yyerror(const char *);
 
 schema_node_t *schema_list;   // create table tbl (`schema_list`)
 schema_node_t *select_list;   // select `select_list` from tbl
+schema_node_t *update_list;   // update table set `update_list` where `condition_tree`
 condition_t *condition_tree;  // select `select_list` from tbl where `condition_tree`
 
 int yywrap() { return 1; }
@@ -35,12 +36,13 @@ void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg
     const char *strval;
     struct schema_node_t *schema_node;
     struct schema_node_t *select_node;
+    struct schema_node_t *update_node;
     struct condition_t   *condition_tree;
 }
 
 // sql keywords
-%token SELECT INSERT CREATE DELETE
-%token FROM TABLE WHERE VALUES INTO
+%token SELECT INSERT CREATE DELETE UPDATE
+%token FROM TABLE WHERE VALUES INTO SET
 %token COMMIT ROLLBACK
 
 // sql operator
@@ -58,6 +60,9 @@ void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg
 %type <schema_node> createitemlist
 %type <select_node> columnitem
 %type <select_node> selectitemlist
+%type <update_node> updateitem
+%type <update_node> updateitemlist
+
 %type <intval> cmp_op logic_op
 %type <condition_tree> conditionitem
 %type <condition_tree> conditions
@@ -76,8 +81,16 @@ statement:
 |   createsql {}
 |   insertsql {}
 |   deletesql {}
+|   updatesql {}
 |   commitsql {}
 |   rollbacksql {}
+;
+
+updatesql:
+    UPDATE IDNAME SET updateitemlist WHERE conditions ';'
+    {
+        statement_set(stm_ptr, STATEMENT_UPDATE_WHERE, $2, update_list, $6);
+    }
 ;
 
 deletesql:
@@ -133,10 +146,34 @@ selectsql:
     }
 ;
 
+updateitem:
+    IDNAME EQUAL NUMBER
+    {
+        $$ = alloc_schema_node($1, 4, COLUMN_INT, $3);
+        free((void *)($1));
+    }
+|   IDNAME EQUAL STRING
+    {
+        $$ = alloc_schema_node($1, 4, COLUMN_VARCHAR, (uint64_t)($3));
+        free((void *)($1));
+    }
+;
+
+updateitemlist:
+    updateitem
+    {
+        list_add_tail(&($1->entry), &(update_list->entry));
+    }
+|   updateitemlist ',' updateitem
+    {
+        list_add_tail(&($3->entry), &(update_list->entry));
+    }
+;
+
 columnitem:
     IDNAME
     {
-        $$ = alloc_schema_node($1, 0, COLUMN_DUMMY);
+        $$ = alloc_schema_node($1, 0, COLUMN_DUMMY, 0);
         free((void *)($1));
     }
 ;
@@ -211,11 +248,11 @@ createsql:
 createitem:
     IDNAME INT '(' NUMBER ')'
     {
-        $$ = alloc_schema_node($1, $4, COLUMN_INT);
+        $$ = alloc_schema_node($1, $4, COLUMN_INT, 0);
     }
 |   IDNAME CHAR '(' NUMBER ')'
     {
-        $$ = alloc_schema_node($1, $4, COLUMN_VARCHAR);
+        $$ = alloc_schema_node($1, $4, COLUMN_VARCHAR, 0);
     }
 
 ;
@@ -239,12 +276,17 @@ void __attribute__((constructor)) init()
     /* used by create sql, e.g. create table tbl (`schema_list`),
      * schema_list is a dummy list head node.
      */
-    schema_list = alloc_schema_node("", 0, COLUMN_DUMMY);
+    schema_list = alloc_schema_node("", 0, COLUMN_DUMMY, 0);
 
     /* used by select sql, e.g. select `select_list` from tbl,
      * select_list is a dummy list head node.
      */
-    select_list = alloc_schema_node("", 0, COLUMN_DUMMY);
+    select_list = alloc_schema_node("", 0, COLUMN_DUMMY, 0);
+
+    /* used by update sql, e.g. update table set `schema = schema_value`
+     * update_list is a dummy list head node.
+     */
+    update_list = alloc_schema_node("", 0, COLUMN_DUMMY, 0);
 
     /* used by where condition, e.g.
      * select `select_list` from tbl where `condition_tree`,
