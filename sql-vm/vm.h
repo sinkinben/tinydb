@@ -68,8 +68,12 @@ execute_result_t execute_select_fields(statement_t *statement, table_t *table)
     while (!(cursor->end_of_table))
     {
         deserialize_row(cursor_value(cursor), &row);
-        cnt++;
-        print_fields(&row, flags);
+
+        if (test_condition(statement->conditions, &row))
+        {
+            cnt++;
+            print_fields(&row, flags);
+        }
         cursor_advance(cursor);
     }
     printf("total %u rows\n", cnt);
@@ -161,7 +165,6 @@ execute_result_t vm_executor(statement_t *statement, table_t *table)
     }
     return EXECUTE_UNKNOWN_STATEMENT;
 }
-
 
 void vm_logger(execute_result_t result, statement_t *statement, buffer_t *input)
 {

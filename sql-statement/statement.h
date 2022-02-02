@@ -49,6 +49,7 @@ static inline void statement_init(statement_t *stm)
  */
 static inline void statement_free(statement_t *stm)
 {
+    assert(stm != NULL);
     if (stm->schemas)
     {
         free_schema_list(stm->schemas);

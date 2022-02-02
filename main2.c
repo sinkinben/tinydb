@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        printf("Must supply a database filename.\n");
+        printf("You must supply a database filename.\n");
         exit(EXIT_FAILURE);
     }
     char *filename = argv[1];
@@ -38,8 +38,12 @@ int main(int argc, char *argv[])
         /* Parse the SQL, and put the result in statement_t `stm` */
         statement_init(stm);
         sql_parser(input->buffer, stm);
+
+        /* Execute the SQL statement, and log the result. */
         result = vm_executor(stm, table);
         vm_logger(result, stm, input);
+
+        /* Free the resources that are allocated in yyparser. */
         statement_free(stm);
     }
 }

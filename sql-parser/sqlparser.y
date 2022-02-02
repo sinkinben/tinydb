@@ -85,7 +85,7 @@ selectsql:
     }
 |   SELECT '*' FROM IDNAME WHERE conditions ';'
     {
-        statement_set(stm_ptr, STATEMENT_SELECT, $4, select_list, $6);
+        statement_set(stm_ptr, STATEMENT_SELECT_FIELDS, $4, select_list, $6);
     }
 |   SELECT selectitemlist FROM IDNAME WHERE conditions ';'
     {
@@ -96,7 +96,8 @@ selectsql:
 columnitem:
     IDNAME
     {
-        $$ = alloc_schema_node($1, 0, -1);
+        $$ = alloc_schema_node($1, 0, COLUMN_DUMMY);
+        free((void *)($1));
     }
 ;
 
@@ -126,15 +127,11 @@ cmp_op:
 conditionitem:
     columnitem cmp_op NUMBER
     {
-        $$ = alloc_condition((uint64_t)(&($1->schema)), $2, $3, true);
-        printf("[conditionitem NUMBER]");
-        print_tree($$, 0);
+        $$ = alloc_condition((uint64_t)(&($1->schema)), $2, $3, true, COLUMN_INT);
     }
 |   columnitem cmp_op STRING
     {
-        $$ = alloc_condition((uint64_t)(&($1->schema)), $2, (uint64_t)($3), true);
-        printf("[conditionitem STRING]");
-        print_tree($$, 0);
+        $$ = alloc_condition((uint64_t)(&($1->schema)), $2, (uint64_t)($3), true, COLUMN_VARCHAR);
     }
 ;
 
@@ -142,8 +139,6 @@ conditions:
     conditionitem
     {
         $$ = $1;
-        printf("[conditionitem]");
-        print_tree($$, 0);
     }
 |   '(' conditions ')'
     {
@@ -151,12 +146,7 @@ conditions:
     }
 |   conditions logic_op conditions
     {
-        printf("[logic %d] left: ", $2);
-        print_tree($1, 0);
-        printf("[logic %d] right: ", $2);
-        print_tree($3, 0);
-
-        $$ = alloc_condition((uint64_t)($1), $2, (uint64_t)($3), false);
+        $$ = alloc_condition((uint64_t)($1), $2, (uint64_t)($3), false, COLUMN_DUMMY);
     }
 ;
 
@@ -209,12 +199,12 @@ void __attribute__((constructor)) init()
     /* used by create sql, e.g. create table tbl (`schema_list`),
      * schema_list is a dummy list head node.
      */
-    schema_list = alloc_schema_node("", 0, DUMMY);
+    schema_list = alloc_schema_node("", 0, COLUMN_DUMMY);
 
     /* used by select sql, e.g. select `select_list` from tbl,
      * select_list is a dummy list head node.
      */
-    select_list = alloc_schema_node("", 0, DUMMY);
+    select_list = alloc_schema_node("", 0, COLUMN_DUMMY);
 
     /* used by where condition, e.g.
      * select `select_list` from tbl where `condition_tree`,

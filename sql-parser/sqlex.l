@@ -48,9 +48,16 @@
 "or" |
 "OR" { return OR; }
 
-[\'][A-Za-z][A-Za-z0-9_]*[\'] 		{ yylval.strval = strdup(yytext); return STRING; }
-[A-Za-z][A-Za-z0-9_]*	            { yylval.strval = strdup(yytext); return IDNAME; }
-[0-9]+                              { yylval.intval = atoi(yytext);   return NUMBER; }
+[\'][A-Za-z0-9_@\.]*[\'] {
+    /* Remove the single quation marks. */
+    int len = strlen(yytext);
+    yytext[len - 1] = '\0';
+    yylval.strval = strdup(yytext + 1);
+    return STRING;
+}
+
+[A-Za-z][A-Za-z0-9_]* { yylval.strval = strdup(yytext); return IDNAME; }
+[0-9]+                { yylval.intval = atoi(yytext);   return NUMBER; }
 
 \n      { return EOL; }
 [ \t]+  { /* ignore and do nothing */ }

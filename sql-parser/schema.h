@@ -8,7 +8,7 @@
 static const uint32_t TBALE_COLUMN_NAME_MAX_LENGTH = 32;
 typedef enum
 {
-    DUMMY = -1,
+    COLUMN_DUMMY = -1,
     COLUMN_INT,    // -> uint_t in tinydb kernel
     COLUMN_VARCHAR // -> varchar(n) in tinydb kernel
 } column_type_t;
@@ -25,9 +25,12 @@ typedef struct
     char fieldname[TBALE_COLUMN_NAME_MAX_LENGTH];
 } schema_t;
 
+/* We should keep `entry, schema` these two members in order,
+ * see `destroy_condition_tree()`.
+ */
 struct schema_node_t
 {
-    struct list_head entry;
+    list_node_t entry;
     schema_t schema;
 };
 typedef struct schema_node_t schema_node_t;
@@ -45,6 +48,7 @@ static inline schema_node_t *alloc_schema_node(const char *filedname, uint32_t w
 
 static inline void free_schema_list(schema_node_t *schemas)
 {
+    assert(schemas != NULL);
     if (list_empty(&(schemas->entry)))
         return;
     list_node_t *pos, *next;
