@@ -2,7 +2,7 @@ CC=clang -Wall -Wno-pointer-to-int-cast -Wno-unused-function
 
 PROJECT=$(shell pwd)
 SQLPARSER=$(PROJECT)/sql-parser
-SQLVM=$(PROJECT)/sql-v,
+SQLVM=$(PROJECT)/sql-vm
 
 INCLUDE=-I$(PROJECT) -I$(SQLPARSER) -I$(SQLVM)
 
