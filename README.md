@@ -8,12 +8,10 @@ A tiny and dummy database built by myself.
 
 ## Introdution
 
+This project is inspired by sqlite.
+
 - `tinydb` is the simplest prototype of database, it only contains **ONE** table (see `table_t` and `row_t` in source file `types.h`), whose schema is `id(uint32_t), username(string), email(string)` .
 - `id(int)` is the primary key of our table, we will implement index via B+Tree.
-
-
-
-This project is inspired by sqlite.
 
 <div style="margin-left: auto; display: inline-block;"><svg xmlns="http://www.w3.org/2000/svg" class="pikchr" width="367" height="453" viewBox="0 0 490.32 605.52">
 <path d="M2,293L236,293L236,2L2,2Z" style="fill:rgb(216,236,208);stroke-width:2.16;stroke:rgb(0,0,0);"></path>
@@ -69,12 +67,23 @@ This project is inspired by sqlite.
 </svg></div>
 
 
-## Build
+
+There are two version of `tinydb`:
+
+- `main.c` - In this program, I parse the SQL statements by spliting strings, thus the SQL statements are incomplete. And it does **NOT** support `where` keyword.
+- `main2.c` - In this, I implement an tiny SQL Parser based on Flex & Bison, thus the SQL statements in this program are mostly like sqlite or MySQL. And it supports `where` conditions.
+
+For both of them, they have the same format of database file.
+
+
+
+## Build `main.c`
 
 This project has only one `.c` file. And you can build it by:
 
 ```text
-$ make run
+make test
+./tinydb mydb.db
 ```
 
 And it will enter our REPL (Read, Evaluate, Print, Loop) program:
@@ -116,13 +125,66 @@ And it also support some meta commands (for debugging):
 
 
 
-## Test
+## Build `main2.c`
 
 ```bash
-$ mv gemfile Gemfile  # rename Gemfile
-$ bundle install
-$ bundle exec rspec
+make build
+./tinydb mydb.db
 ```
+
+In this program, I implement a SQL Parser. It will support SQL statements like:
+
+- `SELECT * FROM table;`
+- `SELECT col1, col2 FROM table;`
+- `SELECT * FROM table WHERE conditions;`
+- `SELECT col1, col2 FROM table WHERE conditions;`
+- `INSERT INTO table VALUES (NUMBER, STRING, STRING);`
+- `DELETE FROM table WHERE conditions;`
+- `UPDATE table SET col1 = val1, col2 = val2;`
+- `COMMIT;`
+- `ROLLBACK;`
+
+For the above keywords, we can also use lower cases: `select, insert, delete, update, ...`
+
+Please note that there is a `';'` after each SQL statement.
+
+And the `conditions` support operators: `=, !=, >=, >, <=, <, AND, OR`, e.g.
+
+```sql
+SELECT * FROM table WHERE id < 10 OR (id > 100 AND username = 'sinkinben');
+```
+
+The keywords `AND, OR` can be `and, or`.
+
+Here is an example, showing how to use `tinydb`.
+
+```text
+tinydb > insert into table values (1, 'sinkinben', 'skb@qq.com');
+Executed.
+tinydb > select * from table where id=1 and username='sinkinben';
+id = 1 username = sinkinben email = skb@qq.com
+total 1 rows
+Executed.
+tinydb > update table set email='sinkinben@outlook.com' where id=1;
+Executed.
+tinydb > select * from table;
+(1, sinkinben, sinkinben@outlook.com)
+total 1 rows
+Executed.
+tinydb > .exit
+```
+
+
+
+## Running Test
+
+```bash
+mv gemfile Gemfile  # rename Gemfile
+bundle install
+bundle exec rspec
+```
+
+Running this testing script, will fill the database file `mydb.db` with dummy data (total 6000 rows).
 
 
 
