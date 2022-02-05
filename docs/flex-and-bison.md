@@ -1,4 +1,10 @@
-## Simlpe SQL Parser Implemented By Flex and Bison
+## Introduction to Flex and Bison
+
+Before you read this article, you should know the basis prerequisites knowledge:
+
+- Regular Expression
+- Usage of makefile
+- The basic knowledge of compiler
 
 Generally speaking, a compiler has 3 parts:
 
@@ -7,6 +13,12 @@ Generally speaking, a compiler has 3 parts:
 - Middle-end: Optimizer
 - Back-end: Code Generator
   - Back-end will generate the binary code related to specific machine
+
+The tools "Flex & Bison" can help us to build the front-end of a compiler. In this article, we will introduce the basic usages of Flex and Bison via implementing a calculator.
+
+Actually, `flex` and `bison` are commands in unix-like operating systems, see `man flex` or `man bison`.
+
+
 
 
 
@@ -30,7 +42,7 @@ Lexer is called "词法分析器" in Chinese. Lex is the process of converting a
 +--------+----------------------+
 ```
 
----
+<br/>
 
 **Parser**
 
@@ -48,7 +60,7 @@ The parser of a compiler should (and it will) convert the `<lexeme, token type>`
          3     2
 ```
 
----
+<br/>
 
 **Semantic Analyzer**
 
@@ -56,7 +68,7 @@ Semantic analyzer is called "语义分析器" in Chinese. Semantic analysis is t
 
 So what is the "semantic checks"? For example, in strong type language, type checking, object binding both belong to semantic checks. If we have a declaration `float f = "hello"` , then semantic analyzer should (and it will) output some message like `error:incompatible type ` .
 
----
+<br/>
 
 **Code Generator**
 
@@ -76,44 +88,22 @@ foo:
     mov $eax, -1
 ```
 
----
-
-**Lex v.s. Flex**
-
-- Lex
-  - Lex is a tool to generator lexical analyzers.
-  - It was written by Mike Lesk and Eric Schmidt (the Google guy).
-  - It isn’t used anymore.
-- Flex (Fast Lexical analyzer generator)
-  - Free and open source alternative.
-  - We will use Flex + Bison to implement our tiny sql parser.
-
-
-
----
-
-**Yacc v.s. Bison**
-
-- Yacc
-  - Yacc is s a tool to generate parsers (syntactic analyzers).
-  - Generated parsers require a lexical analyzer.
-  - It isn’t used anymore.
-- Bison
-  - Free and open source alternative.
-  - We will use Flex + Bison to implement our tiny sql parser.
-
-In this article, we will implement a tiny sql parser by Flex and Bison.
+<br/>
 
 
 
 ## Flex
+
+The word "Flex", means the fast lexical analyser generator. It can help us to generate the code of a Lexer.
+
+
 
 ### Basic Usage
 
 Let's have a look on an simple example `Word Count`.
 
 ```c
-/* just like Unix wc */
+/* just like Unix command `wc` */
 %{
 int chars = 0;
 int words = 0;
@@ -149,8 +139,8 @@ We can build this `flex.l` file via:
 > flex flex.l
 # On MacOS, -ll means linking flex library (like -lmath, -lpthread).
 # On Ubuntu, it should be -lfl.
-> gcc lex.yy.c -ll  
-> ./a.out 
+> gcc lex.yy.c -ll
+> ./a.out
 Hello world, I am skb.  # Ctrl + D
        1       5      23
 ```
@@ -158,13 +148,17 @@ Hello world, I am skb.  # Ctrl + D
 If we want to count the number of a file, we can:
 
 ```shell
-> ./a.out < lex.yy.c 
+> ./a.out < lex.yy.c
     1749    6570   44115
-> ./a.out < flex.l 
+> ./a.out < flex.l
       20      37     295
 ```
 
- 
+From this example, we can know that `flex` can help us to generate the code of a **lexer**, and the rules (written in regular expressions) of the Lexer are defined by us.
+
+`bison` is similar to `flex`, it will generate the code of a **parser**.
+
+
 
 ### Tokenizer
 
@@ -174,7 +168,7 @@ Let's see some advaned usages. Now, we will tokenizer a expression in C language
 %{
 #include <stdio.h>
 // #include "bison.tab.h"
-typedef enum 
+typedef enum
 {
   NUMBER = 258,
   ADD,
@@ -202,7 +196,7 @@ int yyval;
 int main(int argc, char *argv[])
 {
   int ret;
-  while ((ret = yylex()) != 0) 
+  while ((ret = yylex()) != 0)
   {
     if (ret == NUMBER)
       printf("number = %d, type = %d\n", yyval, ret);
@@ -243,8 +237,8 @@ number = 1000, type = 258
 
 Suppose we have got all the `<token, type>` pairs, and we want to convert them into an AST, that what Bison can help us do.
 
-```
-1 * 2 + 3 * 4 + 5 
+```cpp
+1 * 2 + 3 * 4 + 5
 
         +
       /   \
@@ -252,8 +246,10 @@ Suppose we have got all the `<token, type>` pairs, and we want to convert them i
    /   \
   *     *
  / \   /  \
-1   2 3    4 
+1   2 3    4
 ```
+
+
 
 ### BNF
 
@@ -280,7 +276,7 @@ Bison programs have (not by coincidence) the same three-part structure as flex p
 
 For the BNF rules in bison:
 
-- Each symbol in a bison rule has a value, the value of the target symbol (the one to the left of the colon) is called `$$` in the action code. nd the values on the right are numbered 1, 2 and so forth, up to the number of symbols in the rule.
+- Each symbol in a bison rule has a value, the value of the target symbol (the one to the left of the colon) is called `$$` in the action code. And the values on the right are numbered 1, 2 and so forth, up to the number of symbols in the rule.
 - The values of **tokens** (declared by `%token` line) are whatever was in `yylval` when the scanner returned the token; the values of other symbols are set in rules in the parser. In this parser, the values of the `factor`, `term`, and `exp` symbols are the value of the expression they represent.
 
 ```c
@@ -361,6 +357,8 @@ And we make a simple modification on the flex source file above:
 %%
 ```
 
+Actually, we don't need to explicitly declare an `enum` of tokens `ADD, SUB, ...`. They will be automatically generated by `flex`. See the generated product `lex.yy.c`.
+
 And we build `calc.l` and `calc.y` by `makefile`:
 
 ```makefile
@@ -368,7 +366,7 @@ run:
 	flex calc.l
 	bison -d calc.y
 	# use 'gcc -fl' if you build on Linux
-	gcc -ll calc.tab.c lex.yy.c 
+	gcc -ll calc.tab.c lex.yy.c
 	./a.out
 ```
 
@@ -381,14 +379,14 @@ expr > 1 + 2 - 3 * 4 + 4 / 4 - 1
 expr > 1 + 2
 3
 expr > exit
-bye!        
+bye!
 ```
 
 
 
-### Advanced Usages
+## Summary
 
-TODO.
+In this article, we introduce some basic usages of Flex & Bison. In the next article, we will introduce how to implement a **SQL Parser** via Flex & Bison. See the `sql-parser` branch of [tinydb](https://github.com/sinkinben/tinydb) project.
 
 
 
@@ -396,4 +394,4 @@ TODO.
 
 - [1] [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf)
 - [2] [Introducing to Flex and Bison](https://www.oreilly.com/library/view/flex-bison/9780596805418/ch01.html)
-
+- [3] [Textbook: Flex & Bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf)
