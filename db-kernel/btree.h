@@ -74,14 +74,14 @@ const uint32_t INTERNAL_NODE_HEADER_SIZE = COMMON_NODE_HEADER_SIZE + INTERNAL_NO
  *   - the child pointer (includes the right child pointer) is actually page number of a disk file
  *   - layout is like (child0, key0, child1, key1, ..., child[n-1], key[n-1], right_child)
  *   - there are n keys and n+1 child in internal nodes
- * Notice that our INTERNAL_NODE_HEADER_SIZE = 14, 
+ * Notice that our INTERNAL_NODE_HEADER_SIZE = 14,
  * and total size of (child pointer, key) is just INTERNAL_NODE_CELL_SIZE = 8
- * which implies: 
+ * which implies:
  *   - each internal node can store (4096 - 14) / 8 = 510 pairs (child pointer, key),
  *   - plus the most right child, we can totally 510 keys, and 511 child pointer.
- * 
+ *
  * What does this means? Let's do a simple arithmetic.
- * 
+ *
  * +----------------------+-------------------+------------------------+
  * | interval node layers | max leaf nodes    | size of all leaf nodes |
  * +----------------------+-------------------+------------------------+
@@ -90,7 +90,7 @@ const uint32_t INTERNAL_NODE_HEADER_SIZE = COMMON_NODE_HEADER_SIZE + INTERNAL_NO
  * |          2           | 511 ^ 2 = 261,121 | 2MB * 511 < 1GB        |
  * |          3           | 511 ^ 3           | 1GB * 511 < 512GB      |
  * +----------------------+-------------------+------------------------+
- * 
+ *
  * This is why B-Tree is a useful data structure for index.
  *   - given a key, we can find the corresponding leaf node in log(n) time
  *   - in each node(internal/leaf), we can do a binary search, which is also log(n) time
@@ -182,7 +182,7 @@ uint32_t get_unused_page_num(pager_t *pager)
 void create_new_root(table_t *table, uint32_t right_child_page_num)
 {
     /*
-    - This function is called (called by `leaf_node_split_and_insert`) when we insert a new key 
+    - This function is called (called by `leaf_node_split_and_insert`) when we insert a new key
       into the initialized root node, but the initialized root node is full.
     - The address of right child can be got by argument `right_child_page_num`.
     - The old root contains the data of left child after insertion, then we should:
@@ -618,7 +618,7 @@ void internal_node_insert(table_t *table, uint32_t parent_page_num, uint32_t chi
     // optimize: 或许改成 child_min_key > original_right_child_max_key 比较好
     if (child_max_key > original_right_child_max_key)
     {
-        /** 
+        /**
          * if the `child` will become the rightmost one of parent
          * replace the right child
          **/

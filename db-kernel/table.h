@@ -170,8 +170,8 @@ cursor_t *table_exists(table_t *table, uint32_t key_to_find)
     // printf("[table exists] page = %d\n", cursor->page_num);
     // printf("[table exists] cell = %d\n", cursor->cell_num);
     // printf("[table exists] num_cells = %d\n", *leaf_node_num_cells(node));
-    
-    // In this case, the row address `row = cursor_value(cursor)` is invalid, 
+
+    // In this case, the row address `row = cursor_value(cursor)` is invalid,
     // we should not access memory
     // even if we fill zeros when initialize the leaf node
     if (cursor->cell_num >= *leaf_node_num_cells(node))

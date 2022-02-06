@@ -3,8 +3,10 @@ CC=clang -Wall -Wno-pointer-to-int-cast -Wno-unused-function
 PROJECT=$(shell pwd)
 SQLPARSER=$(PROJECT)/sql-parser
 SQLVM=$(PROJECT)/sql-vm
+LIBS=$(PROJECT)/libs
+DBKERNEL=$(PROJECT)/db-kernel
 
-INCLUDE=-I$(PROJECT) -I$(SQLPARSER) -I$(SQLVM)
+INCLUDE=-I$(PROJECT) -I$(SQLPARSER) -I$(SQLVM) -I$(LIBS) -I$(DBKERNEL)
 
 build: sqlparser
 	$(CC) $(INCLUDE) sqlparser.tab.c lex.yy.c main2.c -o tinydb

@@ -58,7 +58,7 @@ static inline bool list_empty(const list_node_t *head)
  * - 同时判断头指针的 next 和 prev, 仅当两者都指向自己时才返回真
  * - 这主要是为了应付另一个 CPU 正在处理同一个链表而造成 next, prev 不一致的情况
  * - 这一安全保障能力有限：除非其他 CPU 的链表操作只有 list_del_init(), 否则仍然不能保证安全
- * - 还是得加锁机制 
+ * - 还是得加锁机制
  **/
 static inline bool list_empty_careful(const list_node_t *head)
 {
