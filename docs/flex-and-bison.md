@@ -9,10 +9,10 @@ Before you read this article, you should know the basis prerequisites knowledge:
 Generally speaking, a compiler has 3 parts:
 
 - Front-end: Lexer/Scanner, Parser, Semantic Analyzer
-  - Front-end will produce IR (Internal Result)
+  - Front-end will produce IR (Internal Result).
 - Middle-end: Optimizer
 - Back-end: Code Generator
-  - Back-end will generate the binary code related to specific machine
+  - Back-end will generate the binary code related to specific machines.
 
 The tools "Flex & Bison" can help us to build the front-end of a compiler. In this article, we will introduce the basic usages of Flex and Bison via implementing a calculator.
 
@@ -162,7 +162,7 @@ From this example, we can know that `flex` can help us to generate the code of a
 
 ### Tokenizer
 
-Let's see some advaned usages. Now, we will tokenizer a expression in C language.
+Let's see some advaned usages, we will tokenize an expression in this section.
 
 ```c
 %{
@@ -235,7 +235,7 @@ number = 1000, type = 258
 
 ## Bison
 
-Suppose we have got all the `<token, type>` pairs, and we want to convert them into an AST, that what Bison can help us do.
+Suppose we have got all the `<token, type>` pairs, and we want to convert them into an AST, that's what Bison can help us do.
 
 ```cpp
 1 * 2 + 3 * 4 + 5
@@ -253,7 +253,7 @@ Suppose we have got all the `<token, type>` pairs, and we want to convert them i
 
 ### BNF
 
-Backus-Naur Form (BNF), is called "BNF 范式" in some Chinese textbooks. Our BNF example here is very simple (and naivce):
+Backus-Naur Form (BNF), is called "BNF 范式" in some Chinese textbooks. Our BNF example here is very simple (and naive):
 
 ```
 <exp>    ::= <factor>
@@ -268,7 +268,7 @@ In BNF,  `::=` can be read as "is a", and `|` can be read as "or". For example, 
 
 ### Let's Build a Calculator
 
-> The source code of this part can be found in `sqlparser/calcdemo` of the github repo [tinydb](https://github.com/sinkinben/tinydb.git).
+> The source code of this part can be found in `sql-parser/calcdemo` of the github repo [tinydb](https://github.com/sinkinben/tinydb.git).
 
 In this part, we will show the basic usages of Bison via building a calculator (support `+, -, *, /` ) example.
 
@@ -333,7 +333,7 @@ term: NUMBER { $$ = $1; }
 %%
 ```
 
-And we make a simple modification on the flex source file above:
+And we make some simple modifications on the flex source file above:
 
 ```c
 // file: calc.l

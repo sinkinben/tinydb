@@ -19,7 +19,7 @@ This project is inspired by sqlite, has a similar architecture with sqlite (but 
 There are two version of `tinydb`:
 
 - `main.c` - In this program, I parse the SQL statements by spliting strings, thus the SQL statements are incomplete. And it does **NOT** support `where` keyword.
-- `main2.c` - In this, I implement an tiny SQL Parser based on Flex & Bison, thus the SQL statements in this program are mostly like sqlite or MySQL. And it supports `where` conditions.
+- `main2.c` - In this program, I implement an tiny SQL Parser based on Flex & Bison, thus the SQL statements in this program are mostly like sqlite or MySQL. And it supports `where` conditions.
 
 For both of them, they have the same format of database file.
 
@@ -99,7 +99,9 @@ Please note that there is a `';'` after each SQL statement.
 And the `conditions` support operators: `=, !=, >=, >, <=, <, AND, OR`, e.g.
 
 ```sql
-SELECT * FROM table WHERE id < 10 OR (id > 100 AND username = 'sinkinben');
+SELECT * FROM table WHERE id < 10 OR id > 100 AND username = 'sinkinben';
+SELECT * FROM table WHERE id = 1 AND username='1' OR id >= 10 AND id < 20;
+SELECT * FROM table WHERE id = 1 AND username='1' OR id >= 10 AND username < '20';
 ```
 
 The keywords `AND, OR` can be `and, or`.

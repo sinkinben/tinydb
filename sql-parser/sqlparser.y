@@ -63,8 +63,9 @@ void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg
 %type <update_node> updateitem
 %type <update_node> updateitemlist
 
-%type <intval> cmp_op logic_op
+%type <intval> cmp_op
 %type <condition_tree> conditionitem
+%type <condition_tree> conditionfactor
 %type <condition_tree> conditions
 
 
@@ -189,10 +190,6 @@ selectitemlist:
     }
 ;
 
-logic_op:
-    AND         { $$ = OP_AND; }
-|   OR          { $$ = OP_OR; }
-
 cmp_op:
     LESS        { $$ = OP_LESS; }
 |   LESS_EQUAL  { $$ = OP_LESS_EQUAL; }
@@ -200,6 +197,7 @@ cmp_op:
 |   GREAT_EQUAL { $$ = OP_GREAT_EQUAL; }
 |   EQUAL       { $$ = OP_EQUAL; }
 |   NOT_EQUAL   { $$ = OP_NOT_EQUAL; }
+;
 
 conditionitem:
     columnitem cmp_op NUMBER
@@ -212,8 +210,19 @@ conditionitem:
     }
 ;
 
-conditions:
+conditionfactor:
     conditionitem
+    {
+        $$ = $1;
+    }
+|   conditionfactor AND conditionitem
+    {
+        $$ = alloc_condition((uint64_t)($1), OP_AND, (uint64_t)($3), false, COLUMN_DUMMY);
+    }
+;
+
+conditions:
+    conditionfactor
     {
         $$ = $1;
     }
@@ -221,9 +230,9 @@ conditions:
     {
         $$ = $2;
     }
-|   conditions logic_op conditions
+|   conditions OR conditionfactor
     {
-        $$ = alloc_condition((uint64_t)($1), $2, (uint64_t)($3), false, COLUMN_DUMMY);
+        $$ = alloc_condition((uint64_t)($1), OP_OR, (uint64_t)($3), false, COLUMN_DUMMY);
     }
 ;
 
