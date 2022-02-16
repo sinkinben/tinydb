@@ -63,6 +63,8 @@ B-tree 是基于二叉搜索树 (Binary Search Tree, BST) 扩展而来的，
 
 **Leaf Node Structure**
 
+<img src="https://cstack.github.io/db_tutorial/assets/images/leaf-node-format.png" style="width:80%"/>
+
 | Offset |             Member             | Size(bytes) |                         Description                          |
 | :----: | :----------------------------: | :---------: | :----------------------------------------------------------: |
 |   0    |          `node_type`           |      1      |                  Internal node or leaf node                  |
@@ -78,6 +80,8 @@ B-tree 是基于二叉搜索树 (Binary Search Tree, BST) 扩展而来的，
 
 
 **Internal Node Structure**
+
+<img src="https://cstack.github.io/db_tutorial/assets/images/internal-node-format.png" style="width:80%"/>
 
 | Offset |             Member             | Size(bytes) |                         Description                          |
 | :----: | :----------------------------: | :---------: | :----------------------------------------------------------: |
