@@ -9,7 +9,6 @@
 
 extern int yyparse();
 extern int yylex();
-void yyerror(const char *);
 
 schema_node_t *schema_list;   // create table tbl (`schema_list`)
 schema_node_t *select_list;   // select `select_list` from tbl
@@ -18,7 +17,7 @@ condition_t *condition_tree;  // select `select_list` from tbl where `condition_
 
 int yywrap() { return 1; }
 
-void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg); }
+void yyerror(void *parm, const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg); }
 
 #define YYPARSE_PARAM parm
 
@@ -68,6 +67,7 @@ void yyerror(const char *msg) { fprintf(stderr, "[tinydb] SQL Parser: %s\n", msg
 %type <condition_tree> conditionfactor
 %type <condition_tree> conditions
 
+%parse-param {void *parm}
 
 %%
 
