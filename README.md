@@ -30,7 +30,7 @@ For both of them, they have the same format of database file.
 This project has only one `.c` file. And you can build it by:
 
 ```text
-make test
+make dummy
 ./tinydb mydb.db
 ```
 

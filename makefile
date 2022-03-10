@@ -22,5 +22,5 @@ sqlparser:
 	flex $(SQLPARSER)/sqlex.l
 	bison -d $(SQLPARSER)/sqlparser.y
 
-test:
+dummy:
 	$(CC) $(INCLUDE) main.c -o tinydb
