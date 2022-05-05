@@ -6,7 +6,7 @@ A tiny and dummy database built by myself.
 
 
 
-## Introdution
+## Introduction
 
 This project is inspired by sqlite, has a similar architecture with sqlite (but simpler).
 
@@ -14,66 +14,9 @@ This project is inspired by sqlite, has a similar architecture with sqlite (but 
 
 - `tinydb` is the simplest prototype of database, it only contains **ONE** table (see `table_t` and `row_t` in source file `types.h`), whose schema is `id(uint32_t), username(string), email(string)` .
 - `id(int)` is the primary key of our table, we will implement index via B+Tree.
+- `sqlparser-main.c` - The entry of tinydb. In this program, I implement an tiny SQL Parser based on Flex & Bison, thus the SQL statements in this program are mostly like sqlite or MySQL. And it supports `where` conditions.
 
-
-There are two version of `tinydb`:
-
-- `main.c` - In this program, I parse the SQL statements by spliting strings, thus the SQL statements are incomplete. And it does **NOT** support `where` keyword.
-- `main2.c` - In this program, I implement an tiny SQL Parser based on Flex & Bison, thus the SQL statements in this program are mostly like sqlite or MySQL. And it supports `where` conditions.
-
-For both of them, they have the same format of database file.
-
-
-
-## Build `main.c`
-
-This project has only one `.c` file. And you can build it by:
-
-```text
-make dummy
-./tinydb mydb.db
-```
-
-And it will enter our REPL (Read, Evaluate, Print, Loop) program:
-
-```text
-tinydb > insert 1 1 1
-Executed.
-tinydb > insert 2 2 2
-Executed.
-tinydb > insert 3 3 3
-Executed.
-tinydb > update 1 a a
-Executed.
-tinydb > delete 3
-Executed.
-tinydb > select
-(1, a, a)
-(2, 2, 2)
-total 2 rows
-Executed.
-tinydb > 
-```
-
-From so far, `tinydb` supports these sql statement:
-
-- `insert`
-- `select`
-- `delete`
-- `update`
-- `commit`
-- `rollback`
-
-And it also support some meta commands (for debugging):
-
-- `.help`
-- `.exit`
-- `.constants`
-- `.btree`
-
-
-
-## Build `main2.c`
+## Build `sqlparser-main.c`
 
 ```bash
 make build
@@ -92,7 +35,7 @@ In this program, I implement a SQL Parser. It will support SQL statements like:
 - `COMMIT;`
 - `ROLLBACK;`
 
-For the above keywords, we can also use lower cases: `select, insert, delete, update, ...`
+For the above keywords, they can be lower cases: `select, insert, delete, update, ...`
 
 Please note that there is a `';'` after each SQL statement.
 
@@ -138,7 +81,7 @@ Running this testing script, will fill the database file `mydb.db` with dummy da
 
 
 
-## Recommend Readings
+## Further Reading
 
 - [1] [SQLite Database System: Design and Implementation](https://play.google.com/store/books/details/SQLite_Database_System_Design_and_Implementation_F?id=9Z6IQQnX1JEC&gl=US)
 - [2] [Architecture of SQLite](https://www.sqlite.org/arch.html)

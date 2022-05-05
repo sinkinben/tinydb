@@ -9,7 +9,7 @@ DBKERNEL=$(PROJECT)/db-kernel
 INCLUDE=-I$(PROJECT) -I$(SQLPARSER) -I$(SQLVM) -I$(LIBS) -I$(DBKERNEL)
 
 build: sqlparser
-	$(CC) $(INCLUDE) sqlparser.tab.c lex.yy.c main2.c -o tinydb
+	$(CC) $(INCLUDE) sqlparser.tab.c lex.yy.c sqlparser-main.c -o tinydb
 
 clean:
 	rm *.db tinydb lex.yy.c *.tab.c *.tab.h

@@ -1,3 +1,13 @@
+/* In this main.c, I implement the REPL by splitting the string (e.g. strtok, strcmp).
+ * It only support SQL statements as following:
+ * 1) insert 1 1 1 (Insert one row into the table.)
+ * 2) update 1 a a (Update one row where id = 1.)
+ * 3) delete 3     (Delete one row where id = 3.)
+ * 4) select       (Print all rows in table.)
+ * 5) commit       (Commit all dirty pages in memory.)
+ * 6) rollback     (Rollback ONE operation.)
+ * This file is deprecated, since we have more advanced SQL parser, see sqlparser-main.c
+ */
 #include "common.h"
 #include "dummyparser.h"
 #include "transaction.h"
@@ -29,11 +39,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        statement_t statement = {
-            .conditions = NULL,
-            .schemas = NULL,
-            .table_name = filename
-        };
+        statement_t statement = {.conditions = NULL, .schemas = NULL, .table_name = filename};
         switch (parse_statement(input_buffer, &statement))
         {
         case PARSE_SUCCESS:
